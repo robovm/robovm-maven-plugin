@@ -23,6 +23,11 @@
   </description>
   <inceptionYear>2013</inceptionYear>
 
+  <organization>
+    <name>Trillian AB</name>
+    <url>http://www.trillian.se</url>
+  </organization>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
