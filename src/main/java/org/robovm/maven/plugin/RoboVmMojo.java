@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 RoboVM.
+ * Copyright (C) 2013 Trillian AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.io.IOException;
 /**
  * @goal robovm
  * @phase package
- * @execute phase="compile"
+ * @execute phase="package"
  * @requiresDependencyResolution
  */
 public class RoboVmMojo extends AbstractMojo {
