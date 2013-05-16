@@ -21,7 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.robovm.compiler.AppCompiler;
-import org.robovm.compiler.Config;
+import org.robovm.compiler.config.Config;
 
 import java.io.File;
 import java.io.IOException;
