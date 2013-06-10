@@ -119,6 +119,13 @@ public class RoboVmMojo extends AbstractMojo {
     protected OS os;
 
 
+    /**
+     * The directory that the RoboVM distributable for the project will be built to.
+     *
+     * @parameter expression="${project.build.directory}/robovm"
+     */
+    protected File roboVmOutputDir;
+
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -128,7 +135,8 @@ public class RoboVmMojo extends AbstractMojo {
                 .home(new Config.Home(unpackRoboVmDist()))
                 .mainClass(mainClass)
                 .os(os)
-                .arch(arch);
+                .arch(arch)
+                .installDir(roboVmOutputDir);
 
         // configure the runtime classpath
 
@@ -147,8 +155,10 @@ public class RoboVmMojo extends AbstractMojo {
         // execute the RoboVM build
 
         try {
-            AppCompiler compiler = new AppCompiler(builder.build());
+            Config config = builder.build();
+            AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
+            config.getTarget().install();
         } catch (IOException e) {
             throw new MojoExecutionException("Error resolving application classpath for RoboVM build", e);
         }
