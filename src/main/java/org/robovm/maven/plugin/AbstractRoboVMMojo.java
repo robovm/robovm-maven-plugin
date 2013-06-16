@@ -20,7 +20,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
-import org.robovm.compiler.log.ConsoleLogger;
 import org.robovm.compiler.log.Logger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
@@ -88,14 +87,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @parameter expression="${project.build.directory}/robovm"
      */
     protected File outputDir;
-
-
-    /**
-     * Set to true to see verbose logging from the RoboVM compiler
-     *
-     * @parameter expression="${verbose}"
-     */
-    protected boolean verbose;
 
 
     private Logger roboVMLogger;
@@ -167,7 +158,23 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected Logger getRoboVMLogger() {
 
         if (roboVMLogger == null) {
-            roboVMLogger = new ConsoleLogger(verbose);
+            roboVMLogger = new Logger() {
+                public void debug(String s, Object... objects) {
+                    getLog().debug(String.format(s, objects));
+                }
+
+                public void info(String s, Object... objects) {
+                    getLog().info(String.format(s, objects));
+                }
+
+                public void warn(String s, Object... objects) {
+                    getLog().warn(String.format(s, objects));
+                }
+
+                public void error(String s, Object... objects) {
+                    getLog().error(String.format(s, objects));
+                }
+            };
         }
         return roboVMLogger;
     }
