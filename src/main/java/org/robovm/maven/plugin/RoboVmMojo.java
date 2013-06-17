@@ -66,6 +66,11 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
     protected OS os;
 
     /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/robovm.properties"
+     */
+    protected File propertiesFile;
+
+    /**
      * @parameter expression="${project.build.finalName}"
      */
     protected String executableFileName;
@@ -75,6 +80,8 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
 
         getLog().info("Building RoboVM app");
 
+        // standard configuration
+
         Config.Builder builder = new Config.Builder()
                 .home(new Config.Home(unpackRoboVMDist()))
                 .logger(getRoboVMLogger())
@@ -82,7 +89,18 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
                 .executableName(executableFileName)
                 .os(os)
                 .arch(arch)
+                .llvmHomeDir(unpackLLVM())
                 .installDir(outputDir);
+
+        // check for properties files
+
+        if (propertiesFile.exists()) {
+            try {
+                builder.addProperties(propertiesFile);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + propertiesFile);
+            }
+        }
 
         // configure the runtime classpath
 
@@ -101,12 +119,11 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
         // execute the RoboVM build
 
         try {
+
             Config config = builder.build();
             AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
             config.getTarget().install();
-
-            //config.getTarget().launch(config.getTarget().createLaunchParameters());
 
         } catch (IOException e) {
             throw new MojoExecutionException("Error building RoboVM executable for app", e);
