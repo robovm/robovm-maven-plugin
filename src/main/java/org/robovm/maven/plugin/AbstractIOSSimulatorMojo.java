@@ -24,13 +24,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @goal ios-simulator
- * @phase package
- * @execute goal="robovm"
- * @requiresDependencyResolution
- */
-public class IOSSimulatorMojo extends AbstractRoboVMMojo {
+public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
+
+    private String targetDevice;
+
+    protected AbstractIOSSimulatorMojo(String targetDevice) {
+        this.targetDevice = targetDevice;
+    }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -42,7 +42,7 @@ public class IOSSimulatorMojo extends AbstractRoboVMMojo {
             args.add("--unbuffered");
 
             args.add("--family");
-            args.add("iphone");
+            args.add(targetDevice);
 
             File roboVMBinDir = new File(unpackRoboVMDist(), "bin");
             String iosSimPath = new File(roboVMBinDir, "ios-sim").getAbsolutePath();
