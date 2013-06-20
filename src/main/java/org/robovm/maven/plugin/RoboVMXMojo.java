@@ -33,7 +33,7 @@ import java.io.IOException;
  * @execute phase="package"
  * @requiresDependencyResolution
  */
-public class RoboVMMojo extends AbstractRoboVMMojo {
+public class RoboVMXMojo extends AbstractRoboVMMojo {
 
     /**
      * The maven project.
@@ -42,6 +42,16 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
      * @required
      */
     protected MavenProject project;
+
+    /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/robovm.properties"
+     */
+    protected File propertiesFile;
+
+    /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/config.xml"
+     */
+    protected File configFile;
 
     /**
      * The main class to run when the application is started.
@@ -66,14 +76,48 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
     protected OS os;
 
     /**
-     * @parameter expression="${project.baseDir}/src/main/robovm/robovm.properties"
+     * The iOS SDK version level supported by this app when running on iOS.
+     *
+     * @parameter
      */
-    protected File propertiesFile;
+    protected String iosSdkVersion;
+
+    /**
+     * The identity to sign the app as when building an iOS bundle for the app.
+     *
+     * @parameter
+     */
+    protected String iosSignIdentity;
 
     /**
      * @parameter expression="${project.build.finalName}"
      */
-    protected String executableFileName;
+    protected String executableName;
+
+    /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/Info.plist"
+     */
+    protected File infoPList;
+
+    /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/Entitlements.plist"
+     */
+    protected File entitlementsPList;
+
+    /**
+     * @parameter expression="${project.baseDir}/src/main/robovm/ResourceRules.plist"
+     */
+    protected File resourceRulesPList;
+
+    /**
+     * @parameter
+     */
+    protected String[] frameworks;
+
+    /**
+     * @parameter
+     */
+    protected String[] libs;
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -86,20 +130,64 @@ public class RoboVMMojo extends AbstractRoboVMMojo {
                 .home(new Config.Home(unpackRoboVMDist()))
                 .logger(getRoboVMLogger())
                 .mainClass(mainClass)
-                .executableName(executableFileName)
+                .executableName(executableName)
                 .os(os)
                 .arch(arch)
                 .llvmHomeDir(unpackLLVM())
-                .installDir(outputDir);
+                .installDir(installDir);
 
-        // check for properties files
 
         if (propertiesFile.exists()) {
             try {
+                getLog().debug("Including properties file in RoboVM compiler config: " + propertiesFile.getAbsolutePath());
                 builder.addProperties(propertiesFile);
             } catch (IOException e) {
                 throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + propertiesFile);
             }
+        }
+
+        if (configFile.exists()) {
+            try {
+                getLog().debug("Loading config file for RoboVM compiler: " + configFile.getAbsolutePath());
+                builder.read(configFile);
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to read RoboVM config file: " + configFile);
+            }
+        }
+
+        if (frameworks != null) {
+            for (String framework : frameworks) {
+                builder.addFramework(framework);
+            }
+        }
+
+        if (libs != null) {
+            for (String lib : libs) {
+                builder.addLib(lib);
+            }
+        }
+
+        if (iosSdkVersion != null) {
+            builder.iosSdkVersion(iosSdkVersion);
+        }
+
+        if (iosSignIdentity != null) {
+            builder.iosSignIdentity(iosSignIdentity);
+        }
+
+        if (infoPList.exists()) {
+            getLog().debug("Using Info.plist input file: " + infoPList.getAbsolutePath());
+            builder.iosInfoPList(infoPList);
+        }
+
+        if (entitlementsPList.exists()) {
+            getLog().debug("Using Entitlements.plist input file: " + entitlementsPList.getAbsolutePath());
+            builder.iosEntitlementsPList(entitlementsPList);
+        }
+
+        if (resourceRulesPList.exists()) {
+            getLog().debug("Using ResourceRules.plist input file: " + resourceRulesPList.getAbsolutePath());
+            builder.iosResourceRulesPList(resourceRulesPList);
         }
 
         // configure the runtime classpath
