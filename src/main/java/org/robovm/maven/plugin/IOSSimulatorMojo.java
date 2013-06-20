@@ -38,7 +38,7 @@ public class IOSSimulatorMojo extends AbstractRoboVMMojo {
 
             List<Object> args = new ArrayList<Object>();
             args.add("launch");
-            args.add(outputDir);
+            args.add(installDir);
             args.add("--unbuffered");
 
             args.add("--family");
@@ -49,7 +49,7 @@ public class IOSSimulatorMojo extends AbstractRoboVMMojo {
 
             Executor executor = new Executor(getRoboVMLogger(), iosSimPath)
                     .args(args)
-                    .wd(outputDir);
+                    .wd(installDir);
             executor.execAsync();
 
         } catch (IOException e) {

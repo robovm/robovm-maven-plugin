@@ -83,21 +83,21 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      *
      * @parameter
      */
-    protected File distDir;
+    protected File home;
 
     /**
      * The directory that the RoboVM distributable for the project will be built to.
      *
      * @parameter expression="${project.build.directory}/robovm"
      */
-    protected File outputDir;
+    protected File installDir;
 
     /**
      * The directory where LLVM is installed. If this is not set, then the plugin will default to using the local
      * repository (i.e. .m2 directory) and LLVM will be downloaded and installed under
      * org/robovm/robovm-dist/robovm-dist-{version}/unpack/llvm.
      */
-    protected File llvmHome;
+    protected File llvmHomeDir;
 
 
     private Logger roboVMLogger;
@@ -107,8 +107,8 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         File distTarFile = resolveRoboVMDistArtifact();
         File unpackBaseDir;
-        if (distDir != null) {
-            unpackBaseDir = distDir;
+        if (home != null) {
+            unpackBaseDir = home;
         } else {
             // by default unpack into the local repo directory
             unpackBaseDir = new File(distTarFile.getParent(), "unpacked");
@@ -121,10 +121,10 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     protected File unpackLLVM() throws MojoExecutionException {
 
-        if (llvmHome != null) {
+        if (llvmHomeDir != null) {
 
             // if LLVM Home has been manually specified, use this directly
-            return llvmHome;
+            return llvmHomeDir;
 
         } else {
 
