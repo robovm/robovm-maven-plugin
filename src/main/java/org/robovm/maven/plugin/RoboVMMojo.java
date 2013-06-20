@@ -33,7 +33,7 @@ import java.io.IOException;
  * @execute phase="package"
  * @requiresDependencyResolution
  */
-public class RoboVMXMojo extends AbstractRoboVMMojo {
+public class RoboVMMojo extends AbstractRoboVMMojo {
 
     /**
      * The maven project.
