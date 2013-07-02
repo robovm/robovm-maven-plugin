@@ -17,6 +17,8 @@ package org.robovm.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.robovm.compiler.config.Arch;
+import org.robovm.compiler.config.OS;
 import org.robovm.compiler.util.Executor;
 
 import java.io.File;
@@ -36,9 +38,11 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
         try {
 
+            File archiveDir = buildArchive(OS.ios, Arch.x86);
+
             List<Object> args = new ArrayList<Object>();
             args.add("launch");
-            args.add(installDir);
+            args.add(archiveDir);
             args.add("--unbuffered");
 
             args.add("--family");
@@ -49,7 +53,7 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
             Executor executor = new Executor(getRoboVMLogger(), iosSimPath)
                     .args(args)
-                    .wd(installDir);
+                    .wd(archiveDir);
             executor.execAsync();
 
         } catch (IOException e) {
