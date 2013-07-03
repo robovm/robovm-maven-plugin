@@ -15,6 +15,8 @@
  */
 package org.robovm.maven.plugin;
 
+import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
+
 /**
  * @goal ipad-sim
  * @phase package
@@ -24,6 +26,6 @@ package org.robovm.maven.plugin;
 public class IPadSimMojo extends AbstractIOSSimulatorMojo {
 
     public IPadSimMojo() {
-        super("ipad");
+        super(IOSSimulatorLaunchParameters.Family.ipad);
     }
 }

@@ -197,14 +197,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     private Logger roboVMLogger;
 
 
-    public File buildArchive(OS os, Arch arch) throws MojoExecutionException, MojoFailureException {
+    public Config buildArchive(OS os, Arch arch) throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
 
         Config.Builder builder = new Config.Builder();
         File robovmSrcDir = new File(project.getBasedir(), "src/main/robovm");
 
-        // load config base file it it exists (and properties)
+        // load config base file if it exists (and properties)
 
         if (propertiesFile != null) {
             if (!propertiesFile.exists()) {
@@ -372,11 +372,11 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             compiler.compile();
             config.getTarget().install();
 
+            return config;
+
         } catch (IOException e) {
             throw new MojoExecutionException("Error building RoboVM executable for app", e);
         }
-
-        return archiveDir;
     }
 
     protected File unpackRoboVMDist() throws MojoExecutionException {

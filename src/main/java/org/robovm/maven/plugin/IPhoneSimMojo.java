@@ -15,6 +15,8 @@
  */
 package org.robovm.maven.plugin;
 
+import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
+
 /**
  * @goal iphone-sim
  * @phase package
@@ -24,6 +26,6 @@ package org.robovm.maven.plugin;
 public class IPhoneSimMojo extends AbstractIOSSimulatorMojo {
 
     public IPhoneSimMojo() {
-        super("iphone");
+        super(IOSSimulatorLaunchParameters.Family.iphone);
     }
 }

@@ -18,43 +18,29 @@ package org.robovm.maven.plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.robovm.compiler.config.Arch;
+import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.OS;
-import org.robovm.compiler.util.Executor;
+import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
-    private String targetDevice;
+    private IOSSimulatorLaunchParameters.Family targetFamily;
 
-    protected AbstractIOSSimulatorMojo(String targetDevice) {
-        this.targetDevice = targetDevice;
+    protected AbstractIOSSimulatorMojo(IOSSimulatorLaunchParameters.Family targetFamily) {
+        this.targetFamily = targetFamily;
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         try {
 
-            File archiveDir = buildArchive(OS.ios, Arch.x86);
-
-            List<Object> args = new ArrayList<Object>();
-            args.add("launch");
-            args.add(archiveDir);
-            args.add("--unbuffered");
-
-            args.add("--family");
-            args.add(targetDevice);
-
-            File roboVMBinDir = new File(unpackRoboVMDist(), "bin");
-            String iosSimPath = new File(roboVMBinDir, "ios-sim").getAbsolutePath();
-
-            Executor executor = new Executor(getRoboVMLogger(), iosSimPath)
-                    .args(args)
-                    .wd(archiveDir);
-            executor.execAsync();
+            Config config = buildArchive(OS.ios, Arch.x86);
+            IOSSimulatorLaunchParameters launchParameters
+                    = (IOSSimulatorLaunchParameters) config.getTarget().createLaunchParameters();
+            launchParameters.setFamily(targetFamily);
+            config.getTarget().launch(launchParameters);
 
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to launch IOS Simulator", e);
