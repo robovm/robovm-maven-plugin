@@ -27,6 +27,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.sonatype.aether.RepositorySystem;
@@ -197,7 +198,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     private Logger roboVMLogger;
 
 
-    public Config buildArchive(OS os, Arch arch) throws MojoExecutionException, MojoFailureException {
+    public Config buildArchive(OS os, Arch arch, TargetType targetType) throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
 
@@ -246,14 +247,16 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         // override other settings based on POM
 
         File osDir = new File(installDir, os.name());
-        File archiveDir = new File(osDir, arch.name());
+        File archiveDir = new File(new File(osDir, arch.name()), "");
 
         builder.home(new Config.Home(unpackRoboVMDist()))
                 .logger(getRoboVMLogger())
                 .mainClass(mainClass)
                 .executableName(executableName)
                 .llvmHomeDir(unpackLLVM())
-                .installDir(archiveDir)
+                .tmpDir(archiveDir)
+                .targetType(targetType)
+                .skipInstall(true)
                 .os(os)
                 .arch(arch);
 
@@ -370,7 +373,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             Config config = builder.build();
             AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
-            config.getTarget().install();
 
             return config;
 

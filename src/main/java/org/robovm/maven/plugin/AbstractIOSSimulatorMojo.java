@@ -19,6 +19,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
 
@@ -36,12 +37,14 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
         try {
 
-            Config config = buildArchive(OS.ios, Arch.x86);
+            Config config = buildArchive(OS.ios, Arch.x86, TargetType.ios);
             IOSSimulatorLaunchParameters launchParameters
                     = (IOSSimulatorLaunchParameters) config.getTarget().createLaunchParameters();
             launchParameters.setFamily(targetFamily);
-            config.getTarget().launch(launchParameters);
+            config.getTarget().launch(launchParameters).waitFor();
 
+        } catch (InterruptedException e) {
+            throw new MojoExecutionException("Failed to launch IOS Simulator", e);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to launch IOS Simulator", e);
         }

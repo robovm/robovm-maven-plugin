@@ -19,6 +19,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.LaunchParameters;
 
@@ -36,10 +37,12 @@ public class IOSDeviceMojo extends AbstractRoboVMMojo {
 
         try {
 
-            Config config = buildArchive(OS.ios, Arch.thumbv7);
+            Config config = buildArchive(OS.ios, Arch.thumbv7, TargetType.ios);
             LaunchParameters launchParameters = config.getTarget().createLaunchParameters();
-            config.getTarget().launch(launchParameters);
+            config.getTarget().launch(launchParameters).waitFor();
 
+        } catch (InterruptedException e) {
+            throw new MojoExecutionException("Failed to launch IOS Device", e);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to launch IOS Device", e);
         }
