@@ -24,6 +24,7 @@ import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.LaunchParameters;
 
 import java.io.IOException;
+
 /**
  * @goal ios-device
  * @phase package

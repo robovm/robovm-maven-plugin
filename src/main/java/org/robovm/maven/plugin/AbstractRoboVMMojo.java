@@ -194,6 +194,11 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      */
     protected File installDir;
 
+    /**
+     * @parameter
+     */
+    protected boolean includeJFX;
+
 
     private Logger roboVMLogger;
 
@@ -351,9 +356,54 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
 
 
+        builder.clearClasspathEntries();
+
+        // add JavaFX if needed
+
+        if (includeJFX) {
+
+            getLog().info("Including JavaFX Runtime in build");
+
+            // add jfxrt.jar to classpath
+            File jfxJar = resolveJavaFXRuntimeArtifact();
+            getLog().debug("JavaFX runtime JAR found at: " + jfxJar);
+            builder.addClasspathEntry(jfxJar);
+
+            // include native files as resources
+
+            File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
+            builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libglass-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-common-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-armv7.a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-sw-armv7.a").getAbsolutePath());
+
+            // add default 'roots' needed for JFX to work
+            builder.addRoot("com.sun.javafx.tk.quantum.QuantumToolkit");
+            builder.addRoot("com.sun.prism.es2.ES2Pipeline");
+            builder.addRoot("com.sun.prism.es2.IOSGLFactory");
+            builder.addRoot("com.sun.glass.ui.ios.**.*");
+            builder.addRoot("javafx.scene.CssStyleHelper");
+            builder.addRoot("com.sun.prism.shader.**.*");
+            builder.addRoot("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
+            builder.addRoot("sun.util.logging.PlatformLogger");
+
+            // add default 'frameworks' needed for JFX to work
+            builder.addFramework("UIKit");
+            builder.addFramework("OpenGLES");
+            builder.addFramework("QuartzCore");
+            builder.addFramework("CoreGraphics");
+            builder.addFramework("CoreText");
+            builder.addFramework("ImageIO");
+            builder.addFramework("MobileCoreServices");
+
+            // todo do we need to exclude built-in JFX from JDK classpath?
+        }
+
         // configure the runtime classpath
 
-        builder.clearClasspathEntries();
         try {
             for (Object object : project.getRuntimeClasspathElements()) {
                 String path = (String) object;
@@ -499,9 +549,32 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     protected File resolveRoboVMDistArtifact() throws MojoExecutionException {
 
-        // resolve the 'dist' dependency using Maven
+        return resolveArtifact("org.robovm:robovm-dist:tar.gz:" + ROBO_VM_VERSION);
+    }
+
+    protected File resolveJavaFXRuntimeArtifact() throws MojoExecutionException {
+
+        return resolveArtifact("net.java.openjfx:jfx-backport:8.7.1");
+    }
+
+    protected File unpackJavaFXNativeIOSArtifact() throws MojoExecutionException {
+
+        File jarFile = resolveJavaFXNativeArtifact();
+        // by default unpack into the local repo directory
+        File unpackBaseDir = new File(jarFile.getParent(), "unpacked");
+        unpack(jarFile, unpackBaseDir);
+        return unpackBaseDir;
+    }
+
+    protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
+
+        return resolveArtifact("net.java.openjfx:jfx-backport-ios-natives:8.7.1");
+    }
+
+    protected File resolveArtifact(String artifactLocator) throws MojoExecutionException {
+
         ArtifactRequest request = new ArtifactRequest();
-        DefaultArtifact artifact = new DefaultArtifact("org.robovm:robovm-dist:tar.gz:" + ROBO_VM_VERSION);
+        DefaultArtifact artifact = new DefaultArtifact(artifactLocator);
         request.setArtifact(artifact);
         request.setRepositories(remoteRepos);
 
