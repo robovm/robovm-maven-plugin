@@ -15,6 +15,10 @@
  */
 package org.robovm.maven.plugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -23,7 +27,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
-import org.codehaus.plexus.util.FileUtils;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
@@ -38,18 +41,11 @@ import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
 /**
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.2";
+    public static final String ROBO_VM_VERSION = "0.0.3";
 
 
     /**
@@ -185,7 +181,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      *
      * @parameter
      */
-    protected String[] roots;
+    protected String[] forceLinkClasses;
 
     /**
      * The directory that the RoboVM distributable for the project will be built to.
@@ -258,17 +254,16 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 .logger(getRoboVMLogger())
                 .mainClass(mainClass)
                 .executableName(executableName)
-                .llvmHomeDir(unpackLLVM())
                 .tmpDir(archiveDir)
                 .targetType(targetType)
                 .skipInstall(true)
                 .os(os)
                 .arch(arch);
 
-        if (roots != null) {
-            for (String root : roots) {
-                getLog().debug("Including class root for linking: " + root);
-                builder.addRoot(root);
+        if (forceLinkClasses != null) {
+            for (String pattern : forceLinkClasses) {
+                getLog().debug("Including class pattern for linking: " + pattern);
+                builder.addForceLinkClass(pattern);
             }
         }
 
@@ -381,14 +376,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             builder.addLib(new File(iosNativesBaseDir, "libprism-sw-armv7.a").getAbsolutePath());
 
             // add default 'roots' needed for JFX to work
-            builder.addRoot("com.sun.javafx.tk.quantum.QuantumToolkit");
-            builder.addRoot("com.sun.prism.es2.ES2Pipeline");
-            builder.addRoot("com.sun.prism.es2.IOSGLFactory");
-            builder.addRoot("com.sun.glass.ui.ios.**.*");
-            builder.addRoot("javafx.scene.CssStyleHelper");
-            builder.addRoot("com.sun.prism.shader.**.*");
-            builder.addRoot("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
-            builder.addRoot("sun.util.logging.PlatformLogger");
+            builder.addForceLinkClass("com.sun.javafx.tk.quantum.QuantumToolkit");
+            builder.addForceLinkClass("com.sun.prism.es2.ES2Pipeline");
+            builder.addForceLinkClass("com.sun.prism.es2.IOSGLFactory");
+            builder.addForceLinkClass("com.sun.glass.ui.ios.**.*");
+            builder.addForceLinkClass("javafx.scene.CssStyleHelper");
+            builder.addForceLinkClass("com.sun.prism.shader.**.*");
+            builder.addForceLinkClass("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
+            builder.addForceLinkClass("sun.util.logging.PlatformLogger");
 
             // add default 'frameworks' needed for JFX to work
             builder.addFramework("UIKit");
@@ -447,109 +442,9 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     }
 
 
-    protected File unpackLLVM() throws MojoExecutionException {
-
-        if (llvmHomeDir != null) {
-
-            // if LLVM Home has been manually specified, use this directly
-            return llvmHomeDir;
-
-        } else {
-
-            // if LLVM Home has not been set, use the robovm-dist repository directory
-
-            File distTarFile = resolveRoboVMDistArtifact();
-            File unpackBaseDir = new File(distTarFile.getParent(), "unpacked");
-
-            File llvmInstallDir = new File(unpackBaseDir, "llvm");
-
-            if (new File(llvmInstallDir, "bin").exists()) {
-
-                getLog().debug("Using LLVM already installed in " + llvmInstallDir.getAbsolutePath());
-
-            } else {
-
-                String llvmDownloadURL;
-                String llvmExtractedDir;
-
-                String os = System.getProperty("os.name").toLowerCase();
-                if (os.contains("mac")) {
-                    llvmDownloadURL = "http://llvm.org/releases/3.2/clang+llvm-3.2-x86_64-apple-darwin11.tar.gz";
-                    llvmExtractedDir = "clang+llvm-3.2-x86_64-apple-darwin11";
-                    getLog().debug("Using Mac Download URL for LLVM: " + llvmDownloadURL);
-                } else if (os.contains("linux")) {
-                    // note we assume Ubuntu - not sure what happens on other distros
-                    llvmDownloadURL = "http://llvm.org/releases/3.2/clang+llvm-3.2-x86_64-linux-ubuntu-12.04.tar.gz";
-                    llvmExtractedDir = "clang+llvm-3.2-x86_64-linux-ubuntu-12.04";
-                    getLog().debug("Using Linux Download URL for LLVM: " + llvmDownloadURL);
-                } else {
-                    throw new MojoExecutionException("The OS you are running on ('" + os
-                            + "') is not supported by RoboVM. Only Mac and Linux are supported at this stage");
-                }
-
-                try {
-
-                    File llvmTempArchive = new File(unpackBaseDir, "llvm.tar.gz");
-                    if (llvmTempArchive.exists()) {
-                        getLog().debug("Deleting previous downloaded archive of LLVM");
-                        if (!llvmTempArchive.delete()) {
-                            throw new MojoExecutionException(
-                                    "Failed to delete archive from previous download of LLVM, try manually deleting this file: " + llvmTempArchive);
-                        }
-                    }
-
-                    getLog().info("Downloading LLVM from " + llvmDownloadURL);
-                    BufferedInputStream in = null;
-                    FileOutputStream fout = null;
-                    try {
-                        in = new BufferedInputStream(new URL(llvmDownloadURL).openStream());
-                        fout = new FileOutputStream(llvmTempArchive);
-                        byte data[] = new byte[1024];
-                        int count;
-                        int total = 0;
-                        while ((count = in.read(data, 0, 1024)) != -1) {
-                            fout.write(data, 0, count);
-                            total += count;
-                            System.out.print("Downloading LLVM  " + total + " bytes                   \r");
-                        }
-                        getLog().info("LLVM downloaded to " + llvmTempArchive);
-                    }
-                    finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                        if (fout != null) {
-                            fout.close();
-                        }
-                    }
-
-                    getLog().info("Unpacking LLVM to " + llvmInstallDir);
-                    File tempDir = new File(unpackBaseDir, "llvm.temp");
-                    if (tempDir.exists()) {
-                        getLog().debug("Deleting previous unpacked archive of LLVM");
-                        if (!tempDir.delete()) {
-                            throw new MojoExecutionException(
-                                    "Failed to delete unpacked directory for previous download of LLVM, try manually deleting: " + tempDir);
-                        }
-                    }
-                    unpack(llvmTempArchive, tempDir);
-                    FileUtils.rename(new File(tempDir, llvmExtractedDir), llvmInstallDir);
-
-                    tempDir.delete();
-                    llvmTempArchive.delete();
-
-                } catch (Exception e) {
-                    throw new MojoExecutionException("Failed to download LLVM from " + llvmDownloadURL, e);
-                }
-            }
-
-            return llvmInstallDir;
-        }
-    }
-
     protected File resolveRoboVMDistArtifact() throws MojoExecutionException {
 
-        return resolveArtifact("org.robovm:robovm-dist:tar.gz:" + ROBO_VM_VERSION);
+        return resolveArtifact("org.robovm:robovm-dist:tar.gz:nocompiler:" + ROBO_VM_VERSION);
     }
 
     protected File resolveJavaFXRuntimeArtifact() throws MojoExecutionException {
