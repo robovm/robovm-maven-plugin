@@ -367,13 +367,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             // include native files as resources
 
             File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
-            builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libglass-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-common-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-armv7.a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-sw-armv7.a").getAbsolutePath());
+//            builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libglass-" + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-" + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-" + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-common-" + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-" + arch.getClangName() + ".a").getAbsolutePath());
+//            builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" + arch.getClangName() + ".a").getAbsolutePath());
 
             // add default 'roots' needed for JFX to work
             builder.addForceLinkClass("com.sun.javafx.tk.quantum.QuantumToolkit");
@@ -383,6 +383,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             builder.addForceLinkClass("javafx.scene.CssStyleHelper");
             builder.addForceLinkClass("com.sun.prism.shader.**.*");
             builder.addForceLinkClass("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
+            builder.addForceLinkClass("com.sun.javafx.font.coretext.CTFactory");
             builder.addForceLinkClass("sun.util.logging.PlatformLogger");
 
             // add default 'frameworks' needed for JFX to work
