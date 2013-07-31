@@ -15,10 +15,6 @@
  */
 package org.robovm.maven.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -40,6 +36,10 @@ import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  */
@@ -98,13 +98,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @parameter
      */
     protected File home;
-
-    /**
-     * The directory where LLVM is installed. If this is not set, then the plugin will default to using the local
-     * repository (i.e. .m2 directory) and LLVM will be downloaded and installed under
-     * org/robovm/robovm-dist/robovm-dist-{version}/unpack/llvm.
-     */
-    protected File llvmHomeDir;
 
     /**
      * @parameter
@@ -359,10 +352,15 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
             getLog().info("Including JavaFX Runtime in build");
 
-            // add jfxrt.jar to classpath
-            File jfxJar = resolveJavaFXRuntimeArtifact();
-            getLog().debug("JavaFX runtime JAR found at: " + jfxJar);
+            // add jfxrt.jar from 78 backport to classpath
+            File jfxJar = resolveJavaFXBackportRuntimeArtifact();
+            getLog().debug("JavaFX backport runtime JAR found at: " + jfxJar);
             builder.addClasspathEntry(jfxJar);
+
+            // add backport compatibility additions to classpath
+            File jfxCompatJar = resolveJavaFXBackportCompatibilityArtifact();
+            getLog().debug("JavaFX backport compatibilty JAR found at: " + jfxCompatJar);
+            builder.addClasspathEntry(jfxCompatJar);
 
             // include native files as resources
 
@@ -448,10 +446,21 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return resolveArtifact("org.robovm:robovm-dist:tar.gz:nocompiler:" + ROBO_VM_VERSION);
     }
 
-    protected File resolveJavaFXRuntimeArtifact() throws MojoExecutionException {
+    protected File resolveJavaFXBackportRuntimeArtifact() throws MojoExecutionException {
 
-        return resolveArtifact("net.java.openjfx:jfx-backport:8.7.1");
+        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport:jar:ios:1.8.0-ea-b96.1");
     }
+
+    protected File resolveJavaFXBackportCompatibilityArtifact() throws MojoExecutionException {
+
+        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport-compat:1.8.0.1");
+    }
+
+    protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
+
+        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport-native:jar:ios:1.8.0-ea-b96.1");
+    }
+
 
     protected File unpackJavaFXNativeIOSArtifact() throws MojoExecutionException {
 
@@ -460,11 +469,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         File unpackBaseDir = new File(jarFile.getParent(), "unpacked");
         unpack(jarFile, unpackBaseDir);
         return unpackBaseDir;
-    }
-
-    protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
-
-        return resolveArtifact("net.java.openjfx:jfx-backport-ios-natives:8.7.1");
     }
 
     protected File resolveArtifact(String artifactLocator) throws MojoExecutionException {
