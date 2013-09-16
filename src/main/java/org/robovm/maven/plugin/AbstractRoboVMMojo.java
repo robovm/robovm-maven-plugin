@@ -28,6 +28,7 @@ import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
+import org.robovm.compiler.config.Resource;
 import org.robovm.compiler.log.Logger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
@@ -45,7 +46,7 @@ import java.util.List;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.3";
+    public static final String ROBO_VM_VERSION = "0.0.4";
 
 
     /**
@@ -164,7 +165,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     /**
      * @parameter
      */
-    protected File[] resources;
+    protected Resource[] resources;
 
     /**
      * Specifies class patterns matching classes that must be linked in when compiling. By default the RoboVM compiler
@@ -327,11 +328,8 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
 
         if (resources != null) {
-            for (File resource : resources) {
-                if (!resource.exists()) {
-                    throw new MojoExecutionException("Invalid 'resource' directory specified for RoboVM compile: " + resource);
-                }
-                getLog().debug("Including resource directory: " + resource.getAbsolutePath());
+            for (Resource resource : resources) {
+                getLog().debug("Including resource: " + resource);
                 builder.addResource(resource);
             }
         } else {
@@ -339,7 +337,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             File resource = new File(robovmSrcDir, "resources");
             if (resource.exists()) {
                 getLog().debug("Using default resource directory: " + resource.getAbsolutePath());
-                builder.addResource(resource);
+                builder.addResource(new Resource(resource, null));
             }
         }
 
