@@ -30,6 +30,8 @@ import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.config.Resource;
 import org.robovm.compiler.log.Logger;
+import org.robovm.compiler.target.ios.ProvisioningProfile;
+import org.robovm.compiler.target.ios.SigningIdentity;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.repository.RemoteRepository;
@@ -46,7 +48,7 @@ import java.util.List;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.4";
+    public static final String ROBO_VM_VERSION = "0.0.5-SNAPSHOT";
 
 
     /**
@@ -131,6 +133,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @parameter
      */
     protected String iosSignIdentity;
+
+    /**
+     * The provisioning profile to use when building for device..
+     *
+     * @parameter
+     */
+    protected String iosProvisioningProfile;
 
     /**
      * @parameter expression="${project.build.finalName}"
@@ -282,9 +291,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         if (iosSignIdentity != null) {
             getLog().debug("Using explicit iOS Signing identity: " + iosSignIdentity);
-            builder.iosSignIdentity(iosSignIdentity);
+            builder.iosSignIdentity(SigningIdentity.find(SigningIdentity.list(), iosSignIdentity));
         }
 
+        if (iosProvisioningProfile != null) {
+            getLog().debug("Using explicit iOS provisioning profile: " + iosProvisioningProfile);
+            builder.iosProvisioningProfile(ProvisioningProfile.find(ProvisioningProfile.list(), iosProvisioningProfile));
+        }
+        
         if (iosInfoPList != null) {
             if (!iosInfoPList.exists()) {
                 throw new MojoExecutionException("Invalid 'iosInfoPList' specified for RoboVM compile: " + iosInfoPList);
