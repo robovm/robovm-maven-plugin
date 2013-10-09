@@ -48,7 +48,7 @@ import java.util.List;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.5-SNAPSHOT";
+    public static final String ROBO_VM_VERSION = "0.0.5";
 
 
     /**
