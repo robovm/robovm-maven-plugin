@@ -130,14 +130,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     /**
      * The identity to sign the app as when building an iOS bundle for the app.
      *
-     * @parameter
+     * @parameter expression="${robovm.iosSignIdentity}"
      */
     protected String iosSignIdentity;
 
     /**
      * The provisioning profile to use when building for device..
      *
-     * @parameter
+     * @parameter expression="${robovm.iosProvisioningProfile}"
      */
     protected String iosProvisioningProfile;
 
