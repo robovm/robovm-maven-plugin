@@ -147,6 +147,9 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     private Logger roboVMLogger;
 
+    protected Config configure(Config.Builder configBuilder) throws IOException {
+        return configBuilder.build();
+    }
 
     public Config buildArchive(OS os, Arch arch, TargetType targetType) throws MojoExecutionException, MojoFailureException {
 
@@ -221,6 +224,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 .tmpDir(tmpDir)
                 .targetType(targetType)
                 .skipInstall(true)
+                .installDir(installDir)
                 .os(os)
                 .arch(arch);
 
@@ -305,7 +309,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         try {
 
             getLog().info("Compiling RoboVM app, this could take a while, especially the first time round");
-            Config config = builder.build();
+            Config config = configure(builder);
             AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
 
