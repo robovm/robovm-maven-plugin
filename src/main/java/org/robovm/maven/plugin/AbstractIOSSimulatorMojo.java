@@ -29,6 +29,11 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
     private IOSSimulatorLaunchParameters.Family targetFamily;
 
+    /**
+     * @parameter expression="${robovm.iosSimSdk}"
+     */
+    protected String sdk;
+
     protected AbstractIOSSimulatorMojo(IOSSimulatorLaunchParameters.Family targetFamily) {
         this.targetFamily = targetFamily;
     }
@@ -41,6 +46,7 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
             IOSSimulatorLaunchParameters launchParameters
                     = (IOSSimulatorLaunchParameters) config.getTarget().createLaunchParameters();
             launchParameters.setFamily(targetFamily);
+            launchParameters.setSdk(sdk);
             config.getTarget().launch(launchParameters).waitFor();
 
         } catch (InterruptedException e) {
