@@ -222,10 +222,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + propertiesFile);
             }
         } else {
-            File file = new File(robovmSrcDir, "Info.plist");
+            File file = new File(robovmSrcDir, "config.properties");
             if (file.exists()) {
                 getLog().debug("Using default properties file: " + file.getAbsolutePath());
-                builder.iosInfoPList(file);
+                try {
+                    builder.addProperties(file);
+                } catch (IOException e) {
+                    throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + file);
+                }
             }
         }
 
