@@ -12,7 +12,7 @@
 
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-plugin</artifactId>
-  <version>0.0.6.1</version>
+  <version>0.0.6.2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>RoboVM Maven Plugin</name>
