@@ -15,7 +15,14 @@
  */
 package org.robovm.maven.plugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -23,12 +30,15 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
+import org.codehaus.plexus.util.xml.PrettyPrintXMLWriter;
+import org.codehaus.plexus.util.xml.XMLWriter;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.Xpp3DomWriter;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
-import org.robovm.compiler.config.Resource;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
 import org.robovm.compiler.target.ios.SigningIdentity;
@@ -39,10 +49,6 @@ import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 /**
  */
@@ -103,29 +109,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected File home;
 
     /**
-     * @parameter
+     * @parameter expression="${robovm.propertiesFile}"
      */
     protected File propertiesFile;
 
     /**
-     * @parameter
+     * @parameter expression="${robovm.configFile}"
      */
     protected File configFile;
-
-    /**
-     * The main class to run when the application is started.
-     *
-     * @parameter
-     * @required
-     */
-    protected String mainClass;
-
-    /**
-     * The iOS SDK version level supported by this app when running on iOS.
-     *
-     * @parameter
-     */
-    protected String iosSdkVersion;
 
     /**
      * The identity to sign the app as when building an iOS bundle for the app.
@@ -140,51 +131,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @parameter expression="${robovm.iosProvisioningProfile}"
      */
     protected String iosProvisioningProfile;
-
-    /**
-     * @parameter expression="${project.build.finalName}"
-     */
-    protected String executableName;
-
-    /**
-     * @parameter
-     */
-    protected File iosInfoPList;
-
-    /**
-     * @parameter
-     */
-    protected File iosEntitlementsPList;
-
-    /**
-     * @parameter
-     */
-    protected File iosResourceRulesPList;
-
-    /**
-     * @parameter
-     */
-    protected String[] frameworks;
-
-    /**
-     * @parameter
-     */
-    protected String[] libs;
-
-    /**
-     * @parameter
-     */
-    protected Resource[] resources;
-
-    /**
-     * Specifies class patterns matching classes that must be linked in when compiling. By default the RoboVM compiler
-     * will link in all classes that are referenced, directly or indirectly, by the target main class. It will not,
-     * however, link in classes that are loaded only by reflection (e.g. via e.g. Class.forName()) so these must be
-     * manually specified by adding a specific 'root' value.
-     *
-     * @parameter
-     */
-    protected String[] forceLinkClasses;
 
     /**
      * The directory that the RoboVM distributable for the project will be built to.
@@ -207,7 +153,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
 
         Config.Builder builder = new Config.Builder();
-        File robovmSrcDir = new File(project.getBasedir(), "src/main/robovm");
 
         // load config base file if it exists (and properties)
 
@@ -222,13 +167,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + propertiesFile);
             }
         } else {
-            File file = new File(robovmSrcDir, "config.properties");
+            File file = new File(project.getBasedir(), "robovm.properties");
             if (file.exists()) {
                 getLog().debug("Using default properties file: " + file.getAbsolutePath());
                 try {
                     builder.addProperties(file);
                 } catch (IOException e) {
-                    throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + file);
+                    throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + file, e);
                 }
             }
         }
@@ -244,54 +189,40 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 throw new MojoExecutionException("Failed to read RoboVM config file: " + configFile);
             }
         } else {
-            File file = new File(robovmSrcDir, "config.xml");
+            File file = new File(project.getBasedir(), "robovm.xml");
             if (file.exists()) {
                 getLog().debug("Using default config file: " + file.getAbsolutePath());
-                builder.iosInfoPList(file);
+                try {
+                    builder.read(file);
+                } catch (Exception e) {
+                    throw new MojoExecutionException("Failed to read RoboVM config file: " + file, e);
+                }
             }
         }
 
+        // Read embedded RoboVM <config> if there is one
+        Plugin plugin = project.getPlugin("org.robovm:robovm-maven-plugin");
+        Xpp3Dom configDom = (Xpp3Dom) plugin.getConfiguration();
+        if (configDom.getChild("config") != null) {
+            StringWriter sw = new StringWriter();
+            XMLWriter xmlWriter = new PrettyPrintXMLWriter(sw, "UTF-8", null);
+            Xpp3DomWriter.write(xmlWriter, configDom.getChild("config"));
+            try {
+                builder.read(new StringReader(sw.toString()), project.getBasedir());
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to read RoboVM config embedded in POM", e);
+            }
+        }
 
-        // override other settings based on POM
-
-        File osDir = new File(installDir, os.name());
-        File archiveDir = new File(new File(osDir, arch.name()), "");
+        File tmpDir = new File(new File(installDir, os.name()), arch.name());
 
         builder.home(new Config.Home(unpackRoboVMDist()))
                 .logger(getRoboVMLogger())
-                .mainClass(mainClass)
-                .executableName(executableName)
-                .tmpDir(archiveDir)
+                .tmpDir(tmpDir)
                 .targetType(targetType)
                 .skipInstall(true)
                 .os(os)
                 .arch(arch);
-
-        if (forceLinkClasses != null) {
-            for (String pattern : forceLinkClasses) {
-                getLog().debug("Including class pattern for linking: " + pattern);
-                builder.addForceLinkClass(pattern);
-            }
-        }
-
-        if (frameworks != null) {
-            for (String framework : frameworks) {
-                getLog().debug("Including framework: " + framework);
-                builder.addFramework(framework);
-            }
-        }
-
-        if (libs != null) {
-            for (String lib : libs) {
-                getLog().debug("Including lib: " + lib);
-                builder.addLib(lib);
-            }
-        }
-
-        if (iosSdkVersion != null) {
-            getLog().debug("Using explicit iOS SDK version: " + iosSdkVersion);
-            builder.iosSdkVersion(iosSdkVersion);
-        }
 
         if (iosSignIdentity != null) {
             getLog().debug("Using explicit iOS Signing identity: " + iosSignIdentity);
@@ -303,63 +234,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             builder.iosProvisioningProfile(ProvisioningProfile.find(ProvisioningProfile.list(), iosProvisioningProfile));
         }
         
-        if (iosInfoPList != null) {
-            if (!iosInfoPList.exists()) {
-                throw new MojoExecutionException("Invalid 'iosInfoPList' specified for RoboVM compile: " + iosInfoPList);
-            }
-            getLog().debug("Using Info.plist input file: " + iosInfoPList.getAbsolutePath());
-            builder.iosInfoPList(iosInfoPList);
-        } else {
-            File file = new File(robovmSrcDir, "Info.plist");
-            if (file.exists()) {
-                getLog().debug("Using default Info.plist input file: " + file.getAbsolutePath());
-                builder.iosInfoPList(file);
-            }
-        }
-
-        if (iosEntitlementsPList != null) {
-            if (!iosEntitlementsPList.exists()) {
-                throw new MojoExecutionException("Invalid 'iosEntitlementsPList' specified for RoboVM compile: " + iosEntitlementsPList);
-            }
-            getLog().debug("Using Entitlements.plist input file: " + iosEntitlementsPList.getAbsolutePath());
-            builder.iosEntitlementsPList(iosEntitlementsPList);
-        } else {
-            File file = new File(robovmSrcDir, "Entitlements.plist");
-            if (file.exists()) {
-                getLog().debug("Using default Entitlements.plist input file: " + file.getAbsolutePath());
-                builder.iosEntitlementsPList(file);
-            }
-        }
-
-        if (iosResourceRulesPList != null) {
-            if (!iosResourceRulesPList.exists()) {
-                throw new MojoExecutionException("Invalid 'iosResourceRulesPList' specified for RoboVM compile: " + iosResourceRulesPList);
-            }
-            getLog().debug("Using ResourceRules.plist input file: " + iosResourceRulesPList.getAbsolutePath());
-            builder.iosResourceRulesPList(iosResourceRulesPList);
-        } else {
-            File file = new File(robovmSrcDir, "ResourceRules.plist");
-            if (file.exists()) {
-                getLog().debug("Using default ResourceRules.plist input file: " + file.getAbsolutePath());
-                builder.iosResourceRulesPList(file);
-            }
-        }
-
-        if (resources != null) {
-            for (Resource resource : resources) {
-                getLog().debug("Including resource: " + resource);
-                builder.addResource(resource);
-            }
-        } else {
-            // check if default resource dir exists
-            File resource = new File(robovmSrcDir, "resources");
-            if (resource.exists()) {
-                getLog().debug("Using default resource directory: " + resource.getAbsolutePath());
-                builder.addResource(new Resource(resource, null));
-            }
-        }
-
-
         builder.clearClasspathEntries();
 
         // add JavaFX if needed
