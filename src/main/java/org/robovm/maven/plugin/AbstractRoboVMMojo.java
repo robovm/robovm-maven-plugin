@@ -54,7 +54,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.6";
+    public static final String ROBO_VM_VERSION = "0.0.7";
 
 
     /**
