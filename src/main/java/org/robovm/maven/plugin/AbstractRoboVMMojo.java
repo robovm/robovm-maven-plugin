@@ -19,8 +19,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -42,13 +49,6 @@ import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
 import org.robovm.compiler.target.ios.SigningIdentity;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 /**
  */
@@ -66,36 +66,20 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
-     * The entry point to Aether, i.e. the component doing all the work.
-     *
-     * @component
-     * @readonly
-     */
-    private RepositorySystem repoSystem;
-
-    /**
-     * The current repository/network configuration of Maven.
-     *
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
-    private RepositorySystemSession repoSession;
-
-    /**
-     * The project's remote repositories to use for the resolution of plugins and their dependencies.
-     *
-     * @parameter default-value="${project.remotePluginRepositories}"
-     * @readonly
-     */
-    private List<RemoteRepository> remoteRepos;
-
-    /**
      * To look up Archiver/UnArchiver implementations
      *
      * @component
      * @readonly
      */
     private ArchiverManager archiverManager;
+
+    /**
+     * To resolve artifacts
+     *
+     * @component
+     * @readonly
+     */
+    private ArtifactResolver artifactResolver;
 
     /**
      * Base directory to extract RoboVM native distribution files into. The robovm-dist bundle will be downloaded from
@@ -338,22 +322,30 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     protected File resolveRoboVMDistArtifact() throws MojoExecutionException {
 
-        return resolveArtifact("org.robovm:robovm-dist:tar.gz:nocompiler:" + ROBO_VM_VERSION);
+	MavenArtifactHandler handler = new MavenArtifactHandler("tar.gz");
+	Artifact artifact = new DefaultArtifact( "org.robovm", "robovm-dist", ROBO_VM_VERSION, "", "tar.gz", "nocompiler", handler );
+	return resolveArtifact(artifact);
     }
 
     protected File resolveJavaFXBackportRuntimeArtifact() throws MojoExecutionException {
-
-        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport:jar:ios:1.8.0-ea-b96.1");
+	
+	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport", "1.8.0-ea-b96.1", "", "jar", "ios", handler );
+	return resolveArtifact(artifact);
     }
 
     protected File resolveJavaFXBackportCompatibilityArtifact() throws MojoExecutionException {
 
-        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport-compat:1.8.0.1");
+	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport-compat", "1.8.0.1", "", "jar", "", handler );
+	return resolveArtifact(artifact);
     }
 
     protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
 
-        return resolveArtifact("net.java.openjfx.backport:openjfx-78-backport-native:jar:ios:1.8.0-ea-b96.1");
+	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport-native", "1.8.0-ea-b96.1", "", "jar", "ios", handler );
+	return resolveArtifact(artifact);
     }
 
 
@@ -366,27 +358,21 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return unpackBaseDir;
     }
 
-    protected File resolveArtifact(String artifactLocator) throws MojoExecutionException {
+    protected File resolveArtifact(Artifact artifact) throws MojoExecutionException { 
 
-        ArtifactRequest request = new ArtifactRequest();
-        DefaultArtifact artifact = new DefaultArtifact(artifactLocator);
-        request.setArtifact(artifact);
-        request.setRepositories(remoteRepos);
+	ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+	request.setArtifact(artifact);
 
-        getLog().debug("Resolving artifact " + artifact + " from " + remoteRepos);
+	getLog().debug("Resolving artifact " + artifact);
 
-        ArtifactResult result;
-        try {
-            result = repoSystem.resolveArtifact(repoSession, request);
-        } catch (ArtifactResolutionException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
+	ArtifactResolutionResult result = artifactResolver.resolve(request);
+	if(!result.isSuccess()) {
+	    throw new MojoExecutionException("Unable to resolve artifact: " + artifact);
         }
-
-        getLog().debug("Resolved artifact " + artifact + " to " + result.getArtifact().getFile()
-                + " from " + result.getRepository());
-
-        return result.getArtifact().getFile();
-    }
+	Collection resolvedArtifacts = result.getArtifacts();
+	artifact = (Artifact)resolvedArtifacts.iterator().next();
+	return artifact.getFile(); 
+   }
 
     protected void unpack(File archive, File targetDirectory) throws MojoExecutionException {
 

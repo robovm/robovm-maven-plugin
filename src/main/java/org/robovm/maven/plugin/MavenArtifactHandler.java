@@ -2,40 +2,42 @@ package org.robovm.maven.plugin;
 
 import org.apache.maven.artifact.handler.ArtifactHandler;
 
-public class MavenArtifactHandler implements ArtifactHandler
-{
-	public String getExtension()
-	{
-		return "tar.gz";
+public class MavenArtifactHandler implements ArtifactHandler {
+
+	private String extension;
+
+	public MavenArtifactHandler() {
+		}
+
+	public MavenArtifactHandler(String ext) {
+		this.extension = ext;
 	}
 
-	public String getDirectory()
-	{
+	public String getExtension() {
+		return extension;
+	}
+
+	public String getDirectory() {
 		return "";
 	}
 
-	public String getClassifier()
-	{
+	public String getClassifier() {
 		return "";
 	}
 
-	public String getPackaging()
-	{
+	public String getPackaging() {
 		return "";
 	}
 
-	public boolean isIncludesDependencies()
-	{
+	public boolean isIncludesDependencies() {
 		return false;
 	}
 
-	public String getLanguage()
-	{
+	public String getLanguage() {
 		return "";
 	}
 
-	public boolean isAddedToClasspath()
-	{
+	public boolean isAddedToClasspath() {
 		return false;
 	}
 }
