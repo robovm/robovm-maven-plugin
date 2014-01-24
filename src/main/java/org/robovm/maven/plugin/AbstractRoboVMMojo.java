@@ -57,10 +57,9 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     public static final String ROBO_VM_VERSION = "0.0.8";
 
-
     /**
      * The maven project.
-     *
+     * 
      * @parameter expression="${project}"
      * @required
      */
@@ -68,7 +67,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     /**
      * To look up Archiver/UnArchiver implementations
-     *
+     * 
      * @component
      * @readonly
      */
@@ -76,26 +75,28 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     /**
      * To resolve artifacts
-     *
+     * 
      * @component
      * @readonly
      */
     private ArtifactResolver artifactResolver;
 
     /**
-     *
+     * 
      * @parameter default-value="${localRepository}"
-     *
+     * 
      */
     private ArtifactRepository localRepository;
 
     /**
-     * Base directory to extract RoboVM native distribution files into. The robovm-dist bundle will be downloaded from
-     * Maven and extracted into this directory. Note that each release of RoboVM is placed in a separate sub-directory
-     * with the version number as suffix.
-     *
-     * If not set, then the tar file is extracted into the local Maven repository where the tar file is downloaded to.
-     *
+     * Base directory to extract RoboVM native distribution files into. The
+     * robovm-dist bundle will be downloaded from Maven and extracted into this
+     * directory. Note that each release of RoboVM is placed in a separate
+     * sub-directory with the version number as suffix.
+     * 
+     * If not set, then the tar file is extracted into the local Maven
+     * repository where the tar file is downloaded to.
+     * 
      * @parameter
      */
     protected File home;
@@ -112,21 +113,22 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     /**
      * The identity to sign the app as when building an iOS bundle for the app.
-     *
+     * 
      * @parameter expression="${robovm.iosSignIdentity}"
      */
     protected String iosSignIdentity;
 
     /**
      * The provisioning profile to use when building for device..
-     *
+     * 
      * @parameter expression="${robovm.iosProvisioningProfile}"
      */
     protected String iosProvisioningProfile;
 
     /**
-     * The directory that the RoboVM distributable for the project will be built to.
-     *
+     * The directory that the RoboVM distributable for the project will be built
+     * to.
+     * 
      * @parameter expression="${project.build.directory}/robovm"
      */
     protected File installDir;
@@ -136,14 +138,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      */
     protected boolean includeJFX;
 
-
     private Logger roboVMLogger;
 
     protected Config configure(Config.Builder configBuilder) throws IOException {
         return configBuilder.build();
     }
 
-    public Config buildArchive(OS os, Arch arch, TargetType targetType) throws MojoExecutionException, MojoFailureException {
+    public Config buildArchive(OS os, Arch arch, TargetType targetType)
+            throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
 
@@ -153,44 +155,61 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         if (propertiesFile != null) {
             if (!propertiesFile.exists()) {
-                throw new MojoExecutionException("Invalid 'propertiesFile' specified for RoboVM compile: " + propertiesFile);
+                throw new MojoExecutionException(
+                        "Invalid 'propertiesFile' specified for RoboVM compile: "
+                                + propertiesFile);
             }
             try {
-                getLog().debug("Including properties file in RoboVM compiler config: " + propertiesFile.getAbsolutePath());
+                getLog().debug(
+                        "Including properties file in RoboVM compiler config: "
+                                + propertiesFile.getAbsolutePath());
                 builder.addProperties(propertiesFile);
             } catch (IOException e) {
-                throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + propertiesFile);
+                throw new MojoExecutionException(
+                        "Failed to add properties file to RoboVM config: "
+                                + propertiesFile);
             }
         } else {
             File file = new File(project.getBasedir(), "robovm.properties");
             if (file.exists()) {
-                getLog().debug("Using default properties file: " + file.getAbsolutePath());
+                getLog().debug(
+                        "Using default properties file: "
+                                + file.getAbsolutePath());
                 try {
                     builder.addProperties(file);
                 } catch (IOException e) {
-                    throw new MojoExecutionException("Failed to add properties file to RoboVM config: " + file, e);
+                    throw new MojoExecutionException(
+                            "Failed to add properties file to RoboVM config: "
+                                    + file, e);
                 }
             }
         }
 
         if (configFile != null) {
             if (!configFile.exists()) {
-                throw new MojoExecutionException("Invalid 'configFile' specified for RoboVM compile: " + configFile);
+                throw new MojoExecutionException(
+                        "Invalid 'configFile' specified for RoboVM compile: "
+                                + configFile);
             }
             try {
-                getLog().debug("Loading config file for RoboVM compiler: " + configFile.getAbsolutePath());
+                getLog().debug(
+                        "Loading config file for RoboVM compiler: "
+                                + configFile.getAbsolutePath());
                 builder.read(configFile);
             } catch (Exception e) {
-                throw new MojoExecutionException("Failed to read RoboVM config file: " + configFile);
+                throw new MojoExecutionException(
+                        "Failed to read RoboVM config file: " + configFile);
             }
         } else {
             File file = new File(project.getBasedir(), "robovm.xml");
             if (file.exists()) {
-                getLog().debug("Using default config file: " + file.getAbsolutePath());
+                getLog().debug(
+                        "Using default config file: " + file.getAbsolutePath());
                 try {
                     builder.read(file);
                 } catch (Exception e) {
-                    throw new MojoExecutionException("Failed to read RoboVM config file: " + file, e);
+                    throw new MojoExecutionException(
+                            "Failed to read RoboVM config file: " + file, e);
                 }
             }
         }
@@ -203,33 +222,36 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             XMLWriter xmlWriter = new PrettyPrintXMLWriter(sw, "UTF-8", null);
             Xpp3DomWriter.write(xmlWriter, configDom.getChild("config"));
             try {
-                builder.read(new StringReader(sw.toString()), project.getBasedir());
+                builder.read(new StringReader(sw.toString()),
+                        project.getBasedir());
             } catch (Exception e) {
-                throw new MojoExecutionException("Failed to read RoboVM config embedded in POM", e);
+                throw new MojoExecutionException(
+                        "Failed to read RoboVM config embedded in POM", e);
             }
         }
 
         File tmpDir = new File(new File(installDir, os.name()), arch.name());
 
         builder.home(new Config.Home(unpackRoboVMDist()))
-                .logger(getRoboVMLogger())
-                .tmpDir(tmpDir)
-                .targetType(targetType)
-                .skipInstall(true)
-                .installDir(installDir)
-                .os(os)
-                .arch(arch);
+                .logger(getRoboVMLogger()).tmpDir(tmpDir)
+                .targetType(targetType).skipInstall(true)
+                .installDir(installDir).os(os).arch(arch);
 
         if (iosSignIdentity != null) {
-            getLog().debug("Using explicit iOS Signing identity: " + iosSignIdentity);
-            builder.iosSignIdentity(SigningIdentity.find(SigningIdentity.list(), iosSignIdentity));
+            getLog().debug(
+                    "Using explicit iOS Signing identity: " + iosSignIdentity);
+            builder.iosSignIdentity(SigningIdentity.find(
+                    SigningIdentity.list(), iosSignIdentity));
         }
 
         if (iosProvisioningProfile != null) {
-            getLog().debug("Using explicit iOS provisioning profile: " + iosProvisioningProfile);
-            builder.iosProvisioningProfile(ProvisioningProfile.find(ProvisioningProfile.list(), iosProvisioningProfile));
+            getLog().debug(
+                    "Using explicit iOS provisioning profile: "
+                            + iosProvisioningProfile);
+            builder.iosProvisioningProfile(ProvisioningProfile.find(
+                    ProvisioningProfile.list(), iosProvisioningProfile));
         }
-        
+
         builder.clearClasspathEntries();
 
         // add JavaFX if needed
@@ -245,19 +267,28 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
             // add backport compatibility additions to classpath
             File jfxCompatJar = resolveJavaFXBackportCompatibilityArtifact();
-            getLog().debug("JavaFX backport compatibilty JAR found at: " + jfxCompatJar);
+            getLog().debug(
+                    "JavaFX backport compatibilty JAR found at: "
+                            + jfxCompatJar);
             builder.addClasspathEntry(jfxCompatJar);
 
             // include native files as resources
 
             File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
-//            builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libglass-" + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-" + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-" + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-common-" + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-" + arch.getClangName() + ".a").getAbsolutePath());
-//            builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" + arch.getClangName() + ".a").getAbsolutePath());
+            // builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" +
+            // arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libglass-"
+                    + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-"
+                    + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-"
+                    + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-common-"
+                    + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-"
+                    + arch.getClangName() + ".a").getAbsolutePath());
+            // builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" +
+            // arch.getClangName() + ".a").getAbsolutePath());
 
             // add default 'roots' needed for JFX to work
             builder.addForceLinkClass("com.sun.javafx.tk.quantum.QuantumToolkit");
@@ -288,19 +319,23 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             for (Object object : project.getRuntimeClasspathElements()) {
                 String path = (String) object;
                 if (getLog().isDebugEnabled()) {
-                    getLog().debug("Including classpath element for RoboVM app: " + path);
+                    getLog().debug(
+                            "Including classpath element for RoboVM app: "
+                                    + path);
                 }
                 builder.addClasspathEntry(new File(path));
             }
         } catch (DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException("Error resolving application classpath for RoboVM build", e);
+            throw new MojoExecutionException(
+                    "Error resolving application classpath for RoboVM build", e);
         }
 
         // execute the RoboVM build
 
         try {
 
-            getLog().info("Compiling RoboVM app, this could take a while, especially the first time round");
+            getLog().info(
+                    "Compiling RoboVM app, this could take a while, especially the first time round");
             Config config = configure(builder);
             AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
@@ -308,7 +343,8 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             return config;
 
         } catch (IOException e) {
-            throw new MojoExecutionException("Error building RoboVM executable for app", e);
+            throw new MojoExecutionException(
+                    "Error building RoboVM executable for app", e);
         }
     }
 
@@ -327,37 +363,44 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return unpackedDir;
     }
 
-
     protected File resolveRoboVMDistArtifact() throws MojoExecutionException {
 
-	MavenArtifactHandler handler = new MavenArtifactHandler("tar.gz");
-	Artifact artifact = new DefaultArtifact( "org.robovm", "robovm-dist", ROBO_VM_VERSION, "", "tar.gz", "nocompiler", handler );
-	return resolveArtifact(artifact);
+        MavenArtifactHandler handler = new MavenArtifactHandler("tar.gz");
+        Artifact artifact = new DefaultArtifact("org.robovm", "robovm-dist",
+                ROBO_VM_VERSION, "", "tar.gz", "nocompiler", handler);
+        return resolveArtifact(artifact);
     }
 
-    protected File resolveJavaFXBackportRuntimeArtifact() throws MojoExecutionException {
-	
-	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport", "1.8.0-ea-b96.1", "", "jar", "ios", handler );
-	return resolveArtifact(artifact);
+    protected File resolveJavaFXBackportRuntimeArtifact()
+            throws MojoExecutionException {
+
+        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
+                "openjfx-78-backport", "1.8.0-ea-b96.1", "", "jar", "ios",
+                handler);
+        return resolveArtifact(artifact);
     }
 
-    protected File resolveJavaFXBackportCompatibilityArtifact() throws MojoExecutionException {
+    protected File resolveJavaFXBackportCompatibilityArtifact()
+            throws MojoExecutionException {
 
-	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport-compat", "1.8.0.1", "", "jar", "", handler );
-	return resolveArtifact(artifact);
+        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
+                "openjfx-78-backport-compat", "1.8.0.1", "", "jar", "", handler);
+        return resolveArtifact(artifact);
     }
 
     protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
 
-	MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-	Artifact artifact = new DefaultArtifact( "net.java.openjfx.backport", "openjfx-78-backport-native", "1.8.0-ea-b96.1", "", "jar", "ios", handler );
-	return resolveArtifact(artifact);
+        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
+        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
+                "openjfx-78-backport-native", "1.8.0-ea-b96.1", "", "jar",
+                "ios", handler);
+        return resolveArtifact(artifact);
     }
 
-
-    protected File unpackJavaFXNativeIOSArtifact() throws MojoExecutionException {
+    protected File unpackJavaFXNativeIOSArtifact()
+            throws MojoExecutionException {
 
         File jarFile = resolveJavaFXNativeArtifact();
         // by default unpack into the local repo directory
@@ -366,32 +409,38 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return unpackBaseDir;
     }
 
-    protected File resolveArtifact(Artifact artifact) throws MojoExecutionException { 
+    protected File resolveArtifact(Artifact artifact)
+            throws MojoExecutionException {
 
-	ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-	request.setArtifact(artifact);
-	request.setLocalRepository(localRepository);
-	final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
-	request.setRemoteRepositories(remoteRepositories);
+        ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+        request.setArtifact(artifact);
+        request.setLocalRepository(localRepository);
+        final List<ArtifactRepository> remoteRepositories = project
+                .getRemoteArtifactRepositories();
+        request.setRemoteRepositories(remoteRepositories);
 
-	getLog().debug("Resolving artifact " + artifact);
+        getLog().debug("Resolving artifact " + artifact);
 
-	ArtifactResolutionResult result = artifactResolver.resolve(request);
-	if(!result.isSuccess()) {
-	    throw new MojoExecutionException("Unable to resolve artifact: " + artifact);
+        ArtifactResolutionResult result = artifactResolver.resolve(request);
+        if (!result.isSuccess()) {
+            throw new MojoExecutionException("Unable to resolve artifact: "
+                    + artifact);
         }
-	Collection resolvedArtifacts = result.getArtifacts();
-	artifact = (Artifact)resolvedArtifacts.iterator().next();
-	return artifact.getFile(); 
-   }
+        Collection resolvedArtifacts = result.getArtifacts();
+        artifact = (Artifact) resolvedArtifacts.iterator().next();
+        return artifact.getFile();
+    }
 
-    protected void unpack(File archive, File targetDirectory) throws MojoExecutionException {
+    protected void unpack(File archive, File targetDirectory)
+            throws MojoExecutionException {
 
         if (!targetDirectory.exists()) {
 
             getLog().info("Extracting '" + archive + "' to: " + targetDirectory);
             if (!targetDirectory.mkdirs()) {
-                throw new MojoExecutionException("Unable to create base directory to unpack into: " + targetDirectory);
+                throw new MojoExecutionException(
+                        "Unable to create base directory to unpack into: "
+                                + targetDirectory);
             }
 
             try {
@@ -400,12 +449,16 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 unArchiver.setDestDirectory(targetDirectory);
                 unArchiver.extract();
             } catch (NoSuchArchiverException e) {
-                throw new MojoExecutionException("Unable to unpack archive " + archive + " to " + targetDirectory, e);
+                throw new MojoExecutionException("Unable to unpack archive "
+                        + archive + " to " + targetDirectory, e);
             }
-            getLog().debug("Archive '" + archive + "' unpacked to: " + targetDirectory);
+            getLog().debug(
+                    "Archive '" + archive + "' unpacked to: " + targetDirectory);
 
         } else {
-            getLog().debug("Archive '" + archive + "' was already unpacked in: " + targetDirectory);
+            getLog().debug(
+                    "Archive '" + archive + "' was already unpacked in: "
+                            + targetDirectory);
         }
     }
 

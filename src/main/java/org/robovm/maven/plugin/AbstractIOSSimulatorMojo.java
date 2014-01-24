@@ -34,7 +34,8 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
      */
     protected String sdk;
 
-    protected AbstractIOSSimulatorMojo(IOSSimulatorLaunchParameters.Family targetFamily) {
+    protected AbstractIOSSimulatorMojo(
+            IOSSimulatorLaunchParameters.Family targetFamily) {
         this.targetFamily = targetFamily;
     }
 
@@ -43,16 +44,18 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
         try {
 
             Config config = buildArchive(OS.ios, Arch.x86, TargetType.ios);
-            IOSSimulatorLaunchParameters launchParameters
-                    = (IOSSimulatorLaunchParameters) config.getTarget().createLaunchParameters();
+            IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters) config
+                    .getTarget().createLaunchParameters();
             launchParameters.setFamily(targetFamily);
             launchParameters.setSdk(sdk);
             config.getTarget().launch(launchParameters).waitFor();
 
         } catch (InterruptedException e) {
-            throw new MojoExecutionException("Failed to launch IOS Simulator", e);
+            throw new MojoExecutionException("Failed to launch IOS Simulator",
+                    e);
         } catch (IOException e) {
-            throw new MojoExecutionException("Failed to launch IOS Simulator", e);
+            throw new MojoExecutionException("Failed to launch IOS Simulator",
+                    e);
         }
     }
 }
