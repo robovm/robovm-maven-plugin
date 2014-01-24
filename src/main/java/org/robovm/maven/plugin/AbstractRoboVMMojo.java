@@ -29,6 +29,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -80,6 +81,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @readonly
      */
     private ArtifactResolver artifactResolver;
+
+    /**
+     *
+     * @parameter default-value="${localRepository}"
+     *
+     */
+    private ArtifactRepository localRepository;
 
     /**
      * Base directory to extract RoboVM native distribution files into. The robovm-dist bundle will be downloaded from
@@ -362,8 +370,11 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
 	ArtifactResolutionRequest request = new ArtifactResolutionRequest();
 	request.setArtifact(artifact);
+	request.setLocalRepository(localRepository);
+	final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
+	request.setRemoteRepositories(remoteRepositories);
 
-	getLog().debug("Resolving artifact " + artifact);
+	getLog().info("Resolving artifact " + artifact + " using " + artifactResolver);
 
 	ArtifactResolutionResult result = artifactResolver.resolve(request);
 	if(!result.isSuccess()) {
