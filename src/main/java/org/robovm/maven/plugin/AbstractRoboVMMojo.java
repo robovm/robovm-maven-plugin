@@ -374,7 +374,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 	final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
 	request.setRemoteRepositories(remoteRepositories);
 
-	getLog().info("Resolving artifact " + artifact + " using " + artifactResolver);
+	getLog().debug("Resolving artifact " + artifact);
 
 	ArtifactResolutionResult result = artifactResolver.resolve(request);
 	if(!result.isSuccess()) {
