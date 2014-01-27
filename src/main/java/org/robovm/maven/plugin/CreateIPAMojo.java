@@ -39,7 +39,7 @@ public class CreateIPAMojo extends AbstractRoboVMMojo {
         configBuilder.skipInstall(false);
         return super.configure(configBuilder);
     }
-    
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
