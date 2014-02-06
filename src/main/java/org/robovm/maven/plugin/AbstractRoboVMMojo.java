@@ -55,7 +55,7 @@ import org.robovm.compiler.target.ios.SigningIdentity;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    public static final String ROBO_VM_VERSION = "0.0.8";
+    public static final String ROBO_VM_VERSION = "0.0.9";
 
     /**
      * The maven project.
