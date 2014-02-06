@@ -12,7 +12,7 @@
 
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-plugin</artifactId>
-  <version>0.0.9.1-SNAPSHOT</version>
+  <version>0.0.9.1</version>
   <packaging>maven-plugin</packaging>
 
   <name>RoboVM Maven Plugin</name>
@@ -125,7 +125,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
