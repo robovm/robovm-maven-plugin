@@ -45,6 +45,7 @@ import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.Version;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.Lib;
 import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
@@ -275,16 +276,16 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
             // builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" +
             // arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libglass-"
-                    + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-font-"
-                    + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libjavafx-iio-"
-                    + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-common-"
-                    + arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new File(iosNativesBaseDir, "libprism-es2-"
-                    + arch.getClangName() + ".a").getAbsolutePath());
+            builder.addLib(new Lib(new File(iosNativesBaseDir, "libglass-"
+                    + arch.getClangName() + ".a").getAbsolutePath(), true));
+            builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-font-"
+                    + arch.getClangName() + ".a").getAbsolutePath(), true));
+            builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-iio-"
+                    + arch.getClangName() + ".a").getAbsolutePath(), true));
+            builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-common-"
+                    + arch.getClangName() + ".a").getAbsolutePath(), true));
+            builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-es2-"
+                    + arch.getClangName() + ".a").getAbsolutePath(), true));
             // builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" +
             // arch.getClangName() + ".a").getAbsolutePath());
 

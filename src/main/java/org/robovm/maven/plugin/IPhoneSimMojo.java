@@ -26,6 +26,6 @@ import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
 public class IPhoneSimMojo extends AbstractIOSSimulatorMojo {
 
     public IPhoneSimMojo() {
-        super(IOSSimulatorLaunchParameters.Family.iphone);
+        super(IOSSimulatorLaunchParameters.Family.iPhoneRetina4Inch);
     }
 }
