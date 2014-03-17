@@ -125,6 +125,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected String iosProvisioningProfile;
 
     /**
+     * Whether the app should be signed or not. Unsigned apps can only be run
+     * on jailbroken devices.
+     *
+     * @parameter expression="${robovm.iosSkipSigning}"
+     */
+    protected boolean iosSkipSigning = false;
+
+    /**
      * The directory that the RoboVM distributable for the project will be built
      * to.
      * 
@@ -236,19 +244,23 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 .targetType(targetType).skipInstall(true)
                 .installDir(installDir).os(os).arch(arch);
 
-        if (iosSignIdentity != null) {
-            getLog().debug(
-                    "Using explicit iOS Signing identity: " + iosSignIdentity);
-            builder.iosSignIdentity(SigningIdentity.find(
-                    SigningIdentity.list(), iosSignIdentity));
-        }
+        if (iosSkipSigning) {
+            builder.iosSkipSigning(true);
+        } else {
+            if (iosSignIdentity != null) {
+                getLog().debug(
+                        "Using explicit iOS Signing identity: " + iosSignIdentity);
+                builder.iosSignIdentity(SigningIdentity.find(
+                        SigningIdentity.list(), iosSignIdentity));
+            }
 
-        if (iosProvisioningProfile != null) {
-            getLog().debug(
-                    "Using explicit iOS provisioning profile: "
-                            + iosProvisioningProfile);
-            builder.iosProvisioningProfile(ProvisioningProfile.find(
-                    ProvisioningProfile.list(), iosProvisioningProfile));
+            if (iosProvisioningProfile != null) {
+                getLog().debug(
+                        "Using explicit iOS provisioning profile: "
+                                + iosProvisioningProfile);
+                builder.iosProvisioningProfile(ProvisioningProfile.find(
+                        ProvisioningProfile.list(), iosProvisioningProfile));
+            }
         }
 
         builder.clearClasspathEntries();
