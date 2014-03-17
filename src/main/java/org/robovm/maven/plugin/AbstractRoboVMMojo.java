@@ -24,12 +24,11 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.factory.DefaultArtifactFactory;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -43,6 +42,7 @@ import org.codehaus.plexus.util.xml.XMLWriter;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomWriter;
 import org.robovm.compiler.AppCompiler;
+import org.robovm.compiler.Version;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
@@ -54,8 +54,6 @@ import org.robovm.compiler.target.ios.SigningIdentity;
 /**
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
-
-    public static final String ROBO_VM_VERSION = "0.0.9";
 
     /**
      * The maven project.
@@ -348,6 +346,10 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
     }
 
+    protected String getRoboVMVersion() {
+        return Version.getVersion();
+    }
+
     protected File unpackRoboVMDist() throws MojoExecutionException {
 
         File distTarFile = resolveRoboVMDistArtifact();
@@ -358,7 +360,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             // by default unpack into the local repo directory
             unpackBaseDir = new File(distTarFile.getParent(), "unpacked");
         }
-        File unpackedDir = new File(unpackBaseDir, "robovm-" + ROBO_VM_VERSION);
+        File unpackedDir = new File(unpackBaseDir, "robovm-" + getRoboVMVersion());
         unpack(distTarFile, unpackBaseDir);
         return unpackedDir;
     }
@@ -367,7 +369,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         MavenArtifactHandler handler = new MavenArtifactHandler("tar.gz");
         Artifact artifact = new DefaultArtifact("org.robovm", "robovm-dist",
-                ROBO_VM_VERSION, "", "tar.gz", "nocompiler", handler);
+                getRoboVMVersion(), "", "tar.gz", "nocompiler", handler);
         return resolveArtifact(artifact);
     }
 
