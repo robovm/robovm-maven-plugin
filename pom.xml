@@ -10,6 +10,10 @@
     <version>7</version>
   </parent>
 
+  <properties>
+    <robovm.version>0.0.10</robovm.version>
+  </properties>
+
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-plugin</artifactId>
   <version>0.0.10.1-SNAPSHOT</version>
@@ -166,7 +170,7 @@
     <dependency>
       <groupId>org.robovm</groupId>
       <artifactId>robovm-compiler</artifactId>
-      <version>0.0.10-SNAPSHOT</version>
+      <version>${robovm.version}</version>
     </dependency>
 
   </dependencies>
