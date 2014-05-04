@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -238,6 +239,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
 
         File tmpDir = new File(new File(installDir, os.name()), arch.name());
+        try {
+            FileUtils.deleteDirectory(tmpDir);
+        } catch (IOException e) {
+            throw new MojoExecutionException(
+                    "Failed to clean output dir " + tmpDir, e);
+        }
+        tmpDir.mkdirs();
 
         builder.home(new Config.Home(unpackRoboVMDist()))
                 .logger(getRoboVMLogger()).tmpDir(tmpDir)
