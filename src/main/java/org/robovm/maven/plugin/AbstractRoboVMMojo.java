@@ -35,6 +35,9 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
+import org.apache.maven.shared.dependency.graph.DependencyNode;
+import org.apache.maven.shared.dependency.graph.traversal.CollectingDependencyNodeVisitor;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
@@ -80,6 +83,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * @readonly
      */
     private ArtifactResolver artifactResolver;
+
+    /**
+     * The entry point to Dependencies, i.e. the component doing all the work.
+     * 
+     * @component
+     * @readonly
+     */
+    private DependencyGraphBuilder dependencyGraphBuilder;
 
     /**
      * 
@@ -272,6 +283,38 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
 
         builder.clearClasspathEntries();
+
+        // Add static libs found in the dependency tree
+        try {
+            DependencyNode projectNode = dependencyGraphBuilder.buildDependencyGraph(project, null);
+            CollectingDependencyNodeVisitor visitor = new CollectingDependencyNodeVisitor();
+            projectNode.accept(visitor);
+
+            java.util.Collection<? extends DependencyNode> nodes = visitor.getNodes();
+            Artifact projectArtifact = project.getArtifact();
+            for (final DependencyNode node : nodes) {
+                Artifact artifact = node.getArtifact();
+
+                if (artifact.getType().equals("a")) {
+                    getLog().info("Going to add static lib: " + artifact);
+
+                    ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+                    request.setArtifact(artifact);
+
+                    ArtifactResolutionResult result = artifactResolver.resolve(request);
+                    if (result.isSuccess()) {
+                        Collection resolvedArtifacts = result.getArtifacts();
+                        artifact = (Artifact) resolvedArtifacts.iterator().next();
+
+                        builder.addLib(artifact.getFile().getAbsolutePath());
+                    } else {
+                        throw new MojoExecutionException( "Failed to add artifact: " + artifact );
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new MojoExecutionException( "Failure with artifact", e );
+        }
 
         // add JavaFX if needed
 
