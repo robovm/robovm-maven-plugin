@@ -11,12 +11,12 @@
   </parent>
 
   <properties>
-    <robovm.version>0.0.12</robovm.version>
+    <robovm.version>0.0.13</robovm.version>
   </properties>
 
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-plugin</artifactId>
-  <version>0.0.12.2-SNAPSHOT</version>
+  <version>0.0.13.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>RoboVM Maven Plugin</name>
