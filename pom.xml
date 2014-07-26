@@ -169,7 +169,7 @@
 
     <dependency>
       <groupId>org.robovm</groupId>
-      <artifactId>robovm-compiler</artifactId>
+      <artifactId>robovm-dist-compiler</artifactId>
       <version>${robovm.version}</version>
     </dependency>
 
