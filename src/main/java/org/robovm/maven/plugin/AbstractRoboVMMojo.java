@@ -224,17 +224,25 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         // Read embedded RoboVM <config> if there is one
         Plugin plugin = project.getPlugin("org.robovm:robovm-maven-plugin");
-        Xpp3Dom configDom = (Xpp3Dom) plugin.getConfiguration();
-        if (configDom.getChild("config") != null) {
-            StringWriter sw = new StringWriter();
-            XMLWriter xmlWriter = new PrettyPrintXMLWriter(sw, "UTF-8", null);
-            Xpp3DomWriter.write(xmlWriter, configDom.getChild("config"));
-            try {
-                builder.read(new StringReader(sw.toString()),
-                        project.getBasedir());
-            } catch (Exception e) {
-                throw new MojoExecutionException(
-                        "Failed to read RoboVM config embedded in POM", e);
+        MavenProject p = project;
+        while (p != null && plugin == null) {
+            plugin = p.getPluginManagement().getPluginsAsMap().get("org.robovm:robovm-maven-plugin");
+            p = p.getParent();
+        }
+        if (plugin != null) {
+            getLog().debug("Reading RoboVM plugin configuration from " + p.getFile().getAbsolutePath());
+            Xpp3Dom configDom = (Xpp3Dom) plugin.getConfiguration();
+            if (configDom != null && configDom.getChild("config") != null) {
+                StringWriter sw = new StringWriter();
+                XMLWriter xmlWriter = new PrettyPrintXMLWriter(sw, "UTF-8", null);
+                Xpp3DomWriter.write(xmlWriter, configDom.getChild("config"));
+                try {
+                    builder.read(new StringReader(sw.toString()),
+                            project.getBasedir());
+                } catch (Exception e) {
+                    throw new MojoExecutionException(
+                            "Failed to read RoboVM config embedded in POM", e);
+                }
             }
         }
 
