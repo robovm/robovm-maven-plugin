@@ -16,7 +16,7 @@
 
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-plugin</artifactId>
-  <version>0.0.15-SNAPSHOT</version>
+  <version>1.0.0-alpha-01</version>
   <packaging>maven-plugin</packaging>
 
   <name>RoboVM Maven Plugin</name>
