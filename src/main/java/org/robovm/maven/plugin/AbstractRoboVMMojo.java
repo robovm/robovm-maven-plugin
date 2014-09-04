@@ -157,7 +157,12 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
 
-        Config.Builder builder = new Config.Builder();
+        Config.Builder builder;
+        try {
+            builder = new Config.Builder();
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
 
         // load config base file if it exists (and properties)
 
