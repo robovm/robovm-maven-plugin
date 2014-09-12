@@ -1,0 +1,8 @@
+org/robovm/maven/plugin/IOSDeviceMojo.class
+org/robovm/maven/plugin/CreateIPAMojo.class
+org/robovm/maven/plugin/MavenArtifactHandler.class
+org/robovm/maven/plugin/IPadSimMojo.class
+org/robovm/maven/plugin/AbstractRoboVMMojo.class
+org/robovm/maven/plugin/IPhoneSimMojo.class
+org/robovm/maven/plugin/AbstractIOSSimulatorMojo.class
+org/robovm/maven/plugin/AbstractRoboVMMojo$1.class

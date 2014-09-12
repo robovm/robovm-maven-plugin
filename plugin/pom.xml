@@ -5,25 +5,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <groupId>org.robovm</groupId>
+    <artifactId>robovm-maven-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <properties>
     <robovm.version>1.0.0-SNAPSHOT</robovm.version>
   </properties>
 
-  <groupId>org.robovm</groupId>
-  <artifactId>robovm-maven-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>RoboVM Maven</name>
-  <packaging>pom</packaging>
 
-    
-  <url>https://github.com/robovm/robovm-maven</url>
+  <artifactId>robovm-maven-plugin</artifactId>
+  <version>${robovm.version}</version>
+  <packaging>maven-plugin</packaging>
+
+  <name>RoboVM Maven Plugin</name>
+  <url>https://github.com/robovm/robovm-maven-plugin</url>
   <description>
-    Maven support for RoboVM
+    The RoboVM Maven Plugin provides a way to build RoboVM based distribution bundles.
   </description>
   <inceptionYear>2013</inceptionYear>
 
@@ -67,8 +66,16 @@
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/robovm/robovm-maven/issues</url>
+    <url>https://github.com/robovm/robovm-maven-plugin/issues</url>
   </issueManagement>
+
+  <repositories>
+    <repository>
+      <id>mojo-executor-repository</id>
+      <name>Mojo Executor Repository for Maven</name>
+      <url>http://twdata-m2-repository.googlecode.com/svn/</url>
+    </repository>
+  </repositories>
 
   <build>
     <plugins>
@@ -80,6 +87,7 @@
           <source>1.6</source>
           <target>1.6</target>
           <debug>true</debug>
+          <showDeprecations>true</showDeprecations>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -133,14 +141,63 @@
   </build>
 
   <dependencies>
+
     <dependency>
-      <groupId>org.robovm</groupId>
-      <artifactId>robovm-dist-compiler</artifactId>
-      <version>${robovm.version}</version>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-archiver</artifactId>
+      <version>2.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-compat</artifactId>
+      <version>3.0</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
-    <modules>
-        <module>plugin</module>
-    </modules>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.2</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <mavenExecutorId>forked-path</mavenExecutorId>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
