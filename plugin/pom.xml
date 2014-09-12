@@ -10,13 +10,8 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <properties>
-    <robovm.version>1.0.0-SNAPSHOT</robovm.version>
-  </properties>
-
-
   <artifactId>robovm-maven-plugin</artifactId>
-  <version>${robovm.version}</version>
+
   <packaging>maven-plugin</packaging>
 
   <name>RoboVM Maven Plugin</name>
@@ -25,49 +20,6 @@
     The RoboVM Maven Plugin provides a way to build RoboVM based distribution bundles.
   </description>
   <inceptionYear>2013</inceptionYear>
-
-  <organization>
-    <name>Trillian Mobile AB</name>
-    <url>http://www.robovm.com</url>
-  </organization>
-
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <id>ntherning</id>
-      <name>Niklas Therning</name>
-      <email>niklas@therning.org</email>
-      <roles>
-        <role>Project Lead</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>zonski</id>
-      <name>Daniel Zwolenski</name>
-      <email>zonski@gmail.com</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:git://github.com/robovm/robovm-maven-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:robovm/robovm-maven-plugin.git</developerConnection>
-    <url>https://github.com/robovm/robovm-maven-plugin.git</url>
-  </scm>
-
-  <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/robovm/robovm-maven-plugin/issues</url>
-  </issueManagement>
 
   <repositories>
     <repository>
@@ -80,64 +32,13 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <debug>true</debug>
-          <showDeprecations>true</showDeprecations>
-          <encoding>UTF-8</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>2.3</version>
         <configuration>
           <goalPrefix>robovm</goalPrefix>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-        <artifactId>maven-java-formatter-plugin</artifactId>
-        <version>0.4</version>
-        <configuration>
-          <configFile>${project.basedir}/formatter.xml</configFile>
-        </configuration>
-      </plugin>
     </plugins>
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      com.googlecode.maven-java-formatter-plugin
-                    </groupId>
-                    <artifactId>maven-java-formatter-plugin</artifactId>
-                    <versionRange>[0.4,)</versionRange>
-                    <goals>
-                      <goal>format</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <dependencies>
@@ -167,37 +68,5 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>release-sign-artifacts</id>
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.2</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <mavenExecutorId>forked-path</mavenExecutorId>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>
