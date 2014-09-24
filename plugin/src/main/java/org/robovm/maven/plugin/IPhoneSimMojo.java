@@ -15,7 +15,7 @@
  */
 package org.robovm.maven.plugin;
 
-import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
+import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
 
 /**
  * @goal iphone-sim
@@ -26,6 +26,6 @@ import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
 public class IPhoneSimMojo extends AbstractIOSSimulatorMojo {
 
     public IPhoneSimMojo() {
-        super(IOSSimulatorLaunchParameters.Family.iPhoneRetina4Inch);
+        super(DeviceFamily.iPhone);
     }
 }

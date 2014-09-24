@@ -21,13 +21,15 @@ import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
+import org.robovm.compiler.target.ios.DeviceType;
+import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
 import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
 
 import java.io.IOException;
 
 public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
-    private IOSSimulatorLaunchParameters.Family targetFamily;
+    private DeviceFamily deviceFamily;
 
     /**
      * @parameter expression="${robovm.iosSimSdk}"
@@ -35,8 +37,8 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
     protected String sdk;
 
     protected AbstractIOSSimulatorMojo(
-            IOSSimulatorLaunchParameters.Family targetFamily) {
-        this.targetFamily = targetFamily;
+            DeviceFamily deviceFamily) {
+        this.deviceFamily = deviceFamily;
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -46,8 +48,8 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
             Config config = buildArchive(OS.ios, Arch.x86, TargetType.ios);
             IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters) config
                     .getTarget().createLaunchParameters();
-            launchParameters.setFamily(targetFamily);
-            launchParameters.setSdk(sdk);
+            DeviceType deviceType = DeviceType.getBestDeviceType(config.getHome(), deviceFamily);
+            launchParameters.setDeviceType(deviceType);
             config.getTarget().launch(launchParameters).waitFor();
 
         } catch (InterruptedException e) {
