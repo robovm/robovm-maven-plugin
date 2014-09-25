@@ -11,7 +11,7 @@
   </parent>
 
   <properties>
-    <robovm.version>1.0.0-SNAPSHOT</robovm.version>
+    <robovm.version>1.0.0-alpha-02</robovm.version>
   </properties>
 
   <groupId>org.robovm</groupId>
