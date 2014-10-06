@@ -1,0 +1,16 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<config>
+  <executableName>${symbol_dollar}{app.executable}</executableName>
+  <mainClass>${symbol_dollar}{app.mainclass}</mainClass>
+  <os>ios</os>
+  <arch>thumbv7</arch>
+  <resources>
+    <resource>
+      <directory>src/main/resources</directory>
+    </resource>
+    </resources>
+  <target>ios</target>
+  <iosInfoPList>Info.plist.xml</iosInfoPList>
+</config>
