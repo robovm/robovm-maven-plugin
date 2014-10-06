@@ -12,7 +12,7 @@
 
   <packaging>maven-archetype</packaging>
 
-  <name>effervens-robovm-archetype</name>
+  <name>RoboVM Maven Archetype</name>
 
   <build>
     <extensions>
