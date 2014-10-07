@@ -46,6 +46,12 @@ public class App extends UIApplicationDelegateAdapter {
         window.addSubview(button);
         window.makeKeyAndVisible();
         
+        /*
+         * Retains the window object until the application is deallocated. Prevents Java GC from collecting the window object too
+         * early.
+         */       
+        addStrongRef(window);
+
         return true;
     }
 
