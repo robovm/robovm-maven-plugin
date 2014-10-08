@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>${groupId}</groupId>
+	<artifactId>${artifactId}</artifactId>
+	<version>${version}</version>
+	<packaging>jar</packaging>
+
+	<name>robovm-app</name>
+	<url>http://robovm.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<robovm.version>1.0.0-alpha-02</robovm.version>
+		<junit.version>4.11</junit.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.robovm</groupId>
+				<artifactId>robovm-maven-plugin</artifactId>
+				<version>${robovm.version}</version>
+				<configuration>
+					<config>
+						<mainClass>${package}.App</mainClass>
+						<os>ios</os>
+						<arch>x86</arch>
+					</config>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<additionalProjectnatures>
+						<projectnature>org.robovm.eclipse.RoboVMNature</projectnature>
+					</additionalProjectnatures>
+					<additionalBuildcommands>
+						<buildcommand>org.robovm.eclipse.RoboVMClassBuilder</buildcommand>
+					</additionalBuildcommands>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>
