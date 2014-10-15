@@ -125,13 +125,15 @@
     </pluginManagement>
   </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.robovm</groupId>
-      <artifactId>robovm-dist-compiler</artifactId>
-      <version>${robovm.version}</version>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.robovm</groupId>
+        <artifactId>robovm-dist-compiler</artifactId>
+        <version>${robovm.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>plugin</module>

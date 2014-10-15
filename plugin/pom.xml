@@ -44,6 +44,11 @@
   <dependencies>
 
     <dependency>
+      <groupId>org.robovm</groupId>
+      <artifactId>robovm-dist-compiler</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>3.0</version>
