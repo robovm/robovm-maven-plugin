@@ -59,14 +59,21 @@ import org.robovm.compiler.config.Config.Home;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.LaunchParameters;
+import org.robovm.compiler.target.ios.ProvisioningProfile;
+import org.robovm.compiler.target.ios.SigningIdentity;
 import org.robovm.junit.client.TestClient;
 import org.robovm.maven.resolver.RoboVMResolver;
 
 public class RoboVMSurefireProvider extends AbstractProvider {
-    private final static String PROP_LOG_DEBUG = "robovm.test.log.debug";
-    private final static String PROP_SERVER_DEBUG = "robovm.test.server.debug";
+    private final static String PROP_LOG_DEBUG = "robovm.test.enableDebugLogging";
+    private final static String PROP_SERVER_DEBUG = "robovm.test.enableServerDebugging";
     private final static String PROP_OS = "robovm.test.os";
     private final static String PROP_ARCH = "robovm.test.arch";
+    private final static String PROP_CONFIG_FILE = "robovm.test.configFile";
+    private final static String PROP_PROPERTIES_FILE = "robovm.test.propertiesFile";
+    private final static String PROP_IOS_SIGNING_IDENTITY = "robovm.test.iosSignIdentity";
+    private final static String PROP_IOS_PROVISIONING_PROFILE = "robovm.test.iosProvisioningProfile";
+    private final static String PROP_IOS_SKIP_SIGNING = "robovm.test.iosSkipSigning";
 
     private final ClassLoader testClassLoader;
     private final List<org.junit.runner.notification.RunListener> customRunListeners;
@@ -216,7 +223,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
     private Config.Builder createConfig() throws IOException {
         Config.Builder configBuilder = new Config.Builder();
         
-        configBuilder.logger(new Logger() {
+        Logger logger = new Logger() {
             public void debug(String format, Object... args) {
                 if (Boolean.getBoolean(PROP_LOG_DEBUG)) {
                     providerParameters.getConsoleLogger().info("[DEBUG] " + String.format(format, args) + "\n");
@@ -231,7 +238,8 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             public void error(String format, Object... args) {
                 providerParameters.getConsoleLogger().info("[ERROR] " + String.format(format, args) + "\n");
             }
-        });
+        };
+        configBuilder.logger(logger);
         
         RoboVMResolver roboVMResolver = new RoboVMResolver();
         roboVMResolver.setLogger(new org.robovm.maven.resolver.Logger() {
@@ -254,8 +262,8 @@ public class RoboVMSurefireProvider extends AbstractProvider {
 
         String basedir = System.getProperty("basedir");
         File propertiesFile = null;
-        if (providerParameters.getProviderProperties().containsKey("propertiesFile")) {
-            propertiesFile = new File(providerParameters.getProviderProperties().getProperty("propertiesFile"));
+        if (System.getProperties().containsKey(PROP_PROPERTIES_FILE)) {
+            propertiesFile = new File(System.getProperty(PROP_PROPERTIES_FILE));
             if (!propertiesFile.exists()) {
                 throw new FileNotFoundException("Failed to find specified propertiesFile: " + propertiesFile.getAbsolutePath());
             }
@@ -269,8 +277,8 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             configBuilder.addProperties(propertiesFile);
         }
         File configFile = null;
-        if (providerParameters.getProviderProperties().containsKey("configFile")) {
-            configFile = new File(providerParameters.getProviderProperties().getProperty("configFile"));
+        if (System.getProperties().containsKey(PROP_CONFIG_FILE)) {
+            configFile = new File(System.getProperty(PROP_CONFIG_FILE));
             if (!configFile.exists()) {
                 throw new FileNotFoundException("Failed to find specified configFile: " + configFile.getAbsolutePath());
             }
@@ -289,6 +297,22 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         }
         if (System.getProperty(PROP_ARCH) != null) {
             configBuilder.arch(Arch.valueOf(System.getProperty(PROP_ARCH)));
+        }
+        if (Boolean.getBoolean(PROP_IOS_SKIP_SIGNING)) {
+            configBuilder.iosSkipSigning(true);
+        } else {
+            if (System.getProperty(PROP_IOS_SIGNING_IDENTITY) != null) {
+                String iosSignIdentity = System.getProperty(PROP_IOS_SIGNING_IDENTITY);
+                logger.debug("Using explicit iOS Signing identity: " + iosSignIdentity);
+                configBuilder.iosSignIdentity(SigningIdentity.find(
+                        SigningIdentity.list(), iosSignIdentity));
+            }
+            if (System.getProperty(PROP_IOS_PROVISIONING_PROFILE) != null) {
+                String iosProvisioningProfile = System.getProperty(PROP_IOS_PROVISIONING_PROFILE);
+                logger.debug("Using explicit iOS provisioning profile: " + iosProvisioningProfile);
+                configBuilder.iosProvisioningProfile(ProvisioningProfile.find(
+                        ProvisioningProfile.list(), iosProvisioningProfile));
+            }
         }
         
         // Ignore any classpath entries in the loaded robovm.xml file.
