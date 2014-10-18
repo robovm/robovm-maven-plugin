@@ -66,7 +66,7 @@ import org.robovm.maven.resolver.RoboVMResolver;
 
 public class RoboVMSurefireProvider extends AbstractProvider {
     private final static String PROP_LOG_DEBUG = "robovm.test.enableDebugLogging";
-    private final static String PROP_SERVER_DEBUG = "robovm.test.enableServerDebugging";
+    private final static String PROP_SERVER_DEBUG = "robovm.test.enableServerLogging";
     private final static String PROP_OS = "robovm.test.os";
     private final static String PROP_ARCH = "robovm.test.arch";
     private final static String PROP_CONFIG_FILE = "robovm.test.configFile";
