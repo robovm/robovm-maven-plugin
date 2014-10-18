@@ -222,8 +222,8 @@ public class RoboVMSurefireProvider extends AbstractProvider {
 
     private Config.Builder createConfig() throws IOException {
         Config.Builder configBuilder = new Config.Builder();
-        
-        Logger logger = new Logger() {
+
+        final Logger logger = new Logger() {
             public void debug(String format, Object... args) {
                 if (Boolean.getBoolean(PROP_LOG_DEBUG)) {
                     providerParameters.getConsoleLogger().info("[DEBUG] " + String.format(format, args) + "\n");
@@ -244,14 +244,13 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         RoboVMResolver roboVMResolver = new RoboVMResolver();
         roboVMResolver.setLogger(new org.robovm.maven.resolver.Logger() {
             public void info(String logLine) {
-                providerParameters.getConsoleLogger().info("[INFO] " + logLine + "\n");
+                logger.info(logLine);
             }
             public void debug(String logLine) {
-                if (Boolean.getBoolean(PROP_LOG_DEBUG)) {
-                    providerParameters.getConsoleLogger().info("[DEBUG] " + logLine + "\n");
-                }
+                logger.debug(logLine);
             }
         });
+
         Home home = null;
         if (System.getenv("ROBOVM_DEV_ROOT") != null) {
             home = Home.find();
@@ -260,36 +259,30 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         }
         configBuilder.home(home);
 
-        String basedir = System.getProperty("basedir");
-        File propertiesFile = null;
+        File basedir = new File(System.getProperty("basedir"));
         if (System.getProperties().containsKey(PROP_PROPERTIES_FILE)) {
-            propertiesFile = new File(System.getProperty(PROP_PROPERTIES_FILE));
+            File propertiesFile = new File(System.getProperty(PROP_PROPERTIES_FILE));
             if (!propertiesFile.exists()) {
-                throw new FileNotFoundException("Failed to find specified propertiesFile: " + propertiesFile.getAbsolutePath());
+                throw new FileNotFoundException("Failed to find specified "
+                        + PROP_PROPERTIES_FILE + ": " + propertiesFile.getAbsolutePath());
             }
-        } else {
-            propertiesFile = new File(basedir, "robovm-test.properties");
-            if (!propertiesFile.exists()) {
-                propertiesFile = new File(basedir, "robovm.properties");
-            }
-        }
-        if (propertiesFile.exists()) {
+            logger.debug("Loading RoboVM config properties from " 
+                    + propertiesFile.getAbsolutePath());
             configBuilder.addProperties(propertiesFile);
-        }
-        File configFile = null;
-        if (System.getProperties().containsKey(PROP_CONFIG_FILE)) {
-            configFile = new File(System.getProperty(PROP_CONFIG_FILE));
-            if (!configFile.exists()) {
-                throw new FileNotFoundException("Failed to find specified configFile: " + configFile.getAbsolutePath());
-            }
         } else {
-            configFile = new File(basedir, "robovm-test.xml");
-            if (!configFile.exists()) {
-                configFile = new File(basedir, "robovm.xml");
-            }
+            configBuilder.readProjectProperties(basedir, true);
         }
-        if (configFile.exists()) {
+
+        if (System.getProperties().containsKey(PROP_CONFIG_FILE)) {
+            File configFile = new File(System.getProperty(PROP_CONFIG_FILE));
+            if (!configFile.exists()) {
+                throw new FileNotFoundException("Failed to find specified "
+                        + PROP_CONFIG_FILE + ": " + configFile.getAbsolutePath());
+            }
+            logger.debug("Loading RoboVM config from " + configFile.getAbsolutePath());
             configBuilder.read(configFile);
+        } else {
+            configBuilder.readProjectConfig(basedir, true);
         }
         
         if (System.getProperty(PROP_OS) != null) {
@@ -351,7 +344,6 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             }
         }
         
-        configBuilder.addForceLinkClass(TestClient.SERVER_CLASS_NAME);
         for (Class<?> c : testsToRun.getLocatedClasses()) {
             configBuilder.addForceLinkClass(c.getName());
         }

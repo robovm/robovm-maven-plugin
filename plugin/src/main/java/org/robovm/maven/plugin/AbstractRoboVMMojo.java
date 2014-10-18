@@ -163,6 +163,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
+        builder.logger(getRoboVMLogger());
 
         // load config base file if it exists (and properties)
 
@@ -183,18 +184,12 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                                 + propertiesFile);
             }
         } else {
-            File file = new File(project.getBasedir(), "robovm.properties");
-            if (file.exists()) {
-                getLog().debug(
-                        "Using default properties file: "
-                                + file.getAbsolutePath());
-                try {
-                    builder.addProperties(file);
-                } catch (IOException e) {
-                    throw new MojoExecutionException(
-                            "Failed to add properties file to RoboVM config: "
-                                    + file, e);
-                }
+            try {
+                builder.readProjectProperties(project.getBasedir(), false);
+            } catch (IOException e) {
+                throw new MojoExecutionException(
+                        "Failed to read RoboVM project properties file(s) in " 
+                                + project.getBasedir().getAbsolutePath(), e);
             }
         }
 
@@ -214,16 +209,12 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                         "Failed to read RoboVM config file: " + configFile);
             }
         } else {
-            File file = new File(project.getBasedir(), "robovm.xml");
-            if (file.exists()) {
-                getLog().debug(
-                        "Using default config file: " + file.getAbsolutePath());
-                try {
-                    builder.read(file);
-                } catch (Exception e) {
-                    throw new MojoExecutionException(
-                            "Failed to read RoboVM config file: " + file, e);
-                }
+            try {
+                builder.readProjectConfig(project.getBasedir(), false);
+            } catch (Exception e) {
+                throw new MojoExecutionException(
+                        "Failed to read project RoboVM config file in " 
+                                + project.getBasedir().getAbsolutePath(), e);
             }
         }
 
@@ -261,7 +252,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         tmpDir.mkdirs();
 
         builder.home(new Config.Home(unpackRoboVMDist()))
-                .logger(getRoboVMLogger()).tmpDir(tmpDir)
+                .tmpDir(tmpDir)
                 .targetType(targetType).skipInstall(true)
                 .installDir(installDir).os(os).arch(arch);
 
