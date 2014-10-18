@@ -77,10 +77,10 @@ properties are supported:
 * `robovm.test.enableServerLogging` -- Set to `true` to enable debug logging
   output from the test server executable.
 * `robovm.test.propertiesFile` -- Properties file to read in. If not set the
-  provider will try with `robovm-test.properties` and then
+  provider will try with `robovm.test.properties` and then
   `robovm.properties`.
 * `robovm.test.configFile` -- Config file to read in. If not set the provider
-  will try with `robovm-test.xml` and then `robovm.xml`.
+  will try with `robovm.test.xml` and then `robovm.xml`.
 * `robovm.test.os` -- Sets the OS to test on. If not set the OS will be read
   from the config file. The final fallback is to build for the current host
   OS.
