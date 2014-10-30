@@ -223,7 +223,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         MavenProject p = project;
         while (p != null && plugin == null) {
             plugin = p.getPluginManagement().getPluginsAsMap().get("org.robovm:robovm-maven-plugin");
-            p = p.getParent();
+            if (plugin == null) p = p.getParent();
         }
         if (plugin != null) {
             getLog().debug("Reading RoboVM plugin configuration from " + p.getFile().getAbsolutePath());
