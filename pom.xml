@@ -20,7 +20,6 @@
   <name>RoboVM Maven</name>
   <packaging>pom</packaging>
 
-    
   <url>https://github.com/robovm/robovm-maven-plugin</url>
   <description>
     Maven support for RoboVM
@@ -31,6 +30,13 @@
     <name>Trillian Mobile AB</name>
     <url>http://www.robovm.com</url>
   </organization>
+
+  <mailingLists>
+    <mailingList>
+      <name>RoboVM Discussion</name>
+      <archive>https://groups.google.com/forum/#!forum/robovm</archive>
+    </mailingList>
+  </mailingLists>
 
   <licenses>
     <license>

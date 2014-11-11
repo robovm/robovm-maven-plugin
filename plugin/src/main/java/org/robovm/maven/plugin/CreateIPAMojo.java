@@ -17,21 +17,23 @@ package org.robovm.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.config.Arch;
-import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.Builder;
 import org.robovm.compiler.config.Config.TargetType;
+import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.ios.IOSTarget;
 
 import java.io.IOException;
 
 /**
- * @goal create-ipa
- * @phase package
- * @execute phase="package"
- * @requiresDependencyResolution
+ * Compiles your application and creates an IPA file suitable for upload to the app store.
  */
+@Mojo(name="create-ipa", defaultPhase=LifecyclePhase.PACKAGE,
+      requiresDependencyResolution=ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class CreateIPAMojo extends AbstractRoboVMMojo {
 
     @Override
