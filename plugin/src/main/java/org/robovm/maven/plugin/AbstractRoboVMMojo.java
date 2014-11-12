@@ -34,6 +34,8 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
@@ -45,9 +47,9 @@ import org.codehaus.plexus.util.xml.Xpp3DomWriter;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.Version;
 import org.robovm.compiler.config.Arch;
-import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.Lib;
 import org.robovm.compiler.config.Config.TargetType;
+import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
@@ -57,35 +59,16 @@ import org.robovm.compiler.target.ios.SigningIdentity;
  */
 public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
-    /**
-     * The maven project.
-     * 
-     * @parameter expression="${project}"
-     * @required
-     */
+    @Component
     protected MavenProject project;
 
-    /**
-     * To look up Archiver/UnArchiver implementations
-     * 
-     * @component
-     * @readonly
-     */
+    @Component
     private ArchiverManager archiverManager;
 
-    /**
-     * To resolve artifacts
-     * 
-     * @component
-     * @readonly
-     */
+    @Component
     private ArtifactResolver artifactResolver;
 
-    /**
-     * 
-     * @parameter default-value="${localRepository}"
-     * 
-     */
+    @Parameter(defaultValue="${localRepository}")
     private ArtifactRepository localRepository;
 
     /**
@@ -93,57 +76,54 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * robovm-dist bundle will be downloaded from Maven and extracted into this
      * directory. Note that each release of RoboVM is placed in a separate
      * sub-directory with the version number as suffix.
-     * 
+     *
      * If not set, then the tar file is extracted into the local Maven
      * repository where the tar file is downloaded to.
-     * 
-     * @parameter
      */
+    @Parameter
     protected File home;
 
     /**
-     * @parameter expression="${robovm.propertiesFile}"
+     * The path to a {@code robovm.properties} file which contains info for your app.
      */
+    @Parameter(property="robovm.propertiesFile")
     protected File propertiesFile;
 
     /**
-     * @parameter expression="${robovm.configFile}"
+     * The path to a {@code robovm.xml} file which configures the RoboVM compiler.
      */
+    @Parameter(property="robovm.configFile")
     protected File configFile;
 
     /**
      * The identity to sign the app as when building an iOS bundle for the app.
-     * 
-     * @parameter expression="${robovm.iosSignIdentity}"
      */
+    @Parameter(property="robovm.iosSignIdentity")
     protected String iosSignIdentity;
 
     /**
-     * The provisioning profile to use when building for device..
-     * 
-     * @parameter expression="${robovm.iosProvisioningProfile}"
+     * The provisioning profile to use when building for device.
      */
+    @Parameter(property="robovm.iosProvisioningProfile")
     protected String iosProvisioningProfile;
 
     /**
-     * Whether the app should be signed or not. Unsigned apps can only be run
-     * on jailbroken devices.
-     *
-     * @parameter expression="${robovm.iosSkipSigning}"
+     * Whether the app should be signed or not. Unsigned apps can only be run on jailbroken
+     * devices.
      */
+    @Parameter(property="robovm.iosSkipSigning")
     protected boolean iosSkipSigning = false;
 
     /**
-     * The directory that the RoboVM distributable for the project will be built
-     * to.
-     * 
-     * @parameter expression="${project.build.directory}/robovm"
+     * The directory into which the RoboVM distributable for the project will be built.
      */
+    @Parameter(property="robovm.installDir", defaultValue="${project.build.directory}/robovm")
     protected File installDir;
 
     /**
-     * @parameter
+     * Whether or not to include the JavaFX libraries.
      */
+    @Parameter(property="robovm.includeJFX")
     protected boolean includeJFX;
 
     private Logger roboVMLogger;
@@ -188,7 +168,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 builder.readProjectProperties(project.getBasedir(), false);
             } catch (IOException e) {
                 throw new MojoExecutionException(
-                        "Failed to read RoboVM project properties file(s) in " 
+                        "Failed to read RoboVM project properties file(s) in "
                                 + project.getBasedir().getAbsolutePath(), e);
             }
         }
@@ -213,7 +193,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                 builder.readProjectConfig(project.getBasedir(), false);
             } catch (Exception e) {
                 throw new MojoExecutionException(
-                        "Failed to read project RoboVM config file in " 
+                        "Failed to read project RoboVM config file in "
                                 + project.getBasedir().getAbsolutePath(), e);
             }
         }

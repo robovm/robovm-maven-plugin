@@ -15,14 +15,16 @@
  */
 package org.robovm.maven.plugin;
 
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
 
 /**
- * @goal iphone-sim
- * @phase package
- * @execute phase="package"
- * @requiresDependencyResolution
+ * Compiles your application and deploys it to the iPhone simulator.
  */
+@Mojo(name="iphone-sim", defaultPhase=LifecyclePhase.PACKAGE,
+      requiresDependencyResolution=ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class IPhoneSimMojo extends AbstractIOSSimulatorMojo {
 
     public IPhoneSimMojo() {

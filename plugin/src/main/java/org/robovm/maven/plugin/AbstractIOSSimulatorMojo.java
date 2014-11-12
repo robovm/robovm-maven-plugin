@@ -17,6 +17,7 @@ package org.robovm.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
@@ -33,13 +34,17 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
     private DeviceFamily deviceFamily;
 
     /**
-     * @parameter expression="${robovm.iosSimSdk}"
+     * The iOS SDK version to use when choosing the simulator (e.g. "8.0"). Defaults to the newest
+     * SDK version.
      */
+    @Parameter(property="robovm.iosSimSdk")
     protected String sdk;
 
     /**
-     * @parameter expression="${robovm.iosDeviceName}"
+     * The identifier of the simulator device to use (e.g. "iPhone-5s", "iPad-Retina"). Run {@code
+     * ios-sim showdevicetypes} for a full list.
      */
+    @Parameter(property="robovm.iosDeviceName")
     protected String deviceName;
 
     protected AbstractIOSSimulatorMojo(DeviceFamily deviceFamily) {
