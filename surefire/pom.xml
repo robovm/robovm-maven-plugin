@@ -50,7 +50,6 @@
       <groupId>org.robovm</groupId>
       <artifactId>robovm-dist-compiler</artifactId>
       <version>${robovm.version}</version>
-      <classifier>nodep</classifier>
     </dependency>
     <dependency>
       <groupId>org.robovm</groupId>
