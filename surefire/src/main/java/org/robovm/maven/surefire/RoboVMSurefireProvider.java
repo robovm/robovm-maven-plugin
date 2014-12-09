@@ -252,12 +252,17 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         });
 
         Home home = null;
-        if (System.getenv("ROBOVM_DEV_ROOT") != null) {
+        try {
             home = Home.find();
-        } else {
+        } catch (Throwable t) {}
+        if (home == null || !home.isDev()) {
             home = new Home(roboVMResolver.resolveAndUnpackRoboVMDistArtifact(Version.getVersion()));
         }
         configBuilder.home(home);
+        if (home.isDev()) {
+            configBuilder.useDebugLibs(Boolean.getBoolean("robovm.useDebugLibs"));
+            configBuilder.dumpIntermediates(true);
+        }
 
         File basedir = new File(System.getProperty("basedir"));
         if (System.getProperties().containsKey(PROP_PROPERTIES_FILE)) {

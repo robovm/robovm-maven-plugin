@@ -47,9 +47,10 @@ import org.codehaus.plexus.util.xml.Xpp3DomWriter;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.Version;
 import org.robovm.compiler.config.Arch;
+import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.Home;
 import org.robovm.compiler.config.Config.Lib;
 import org.robovm.compiler.config.Config.TargetType;
-import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
@@ -231,10 +232,21 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
         tmpDir.mkdirs();
 
-        builder.home(new Config.Home(unpackRoboVMDist()))
+        Home home = null;
+        try {
+            home = Home.find();
+        } catch (Throwable t) {}
+        if (home == null || !home.isDev()) {
+            home = new Config.Home(unpackRoboVMDist());
+        }
+        builder.home(home)
                 .tmpDir(tmpDir)
                 .targetType(targetType).skipInstall(true)
                 .installDir(installDir).os(os).arch(arch);
+        if (home.isDev()) {
+            builder.useDebugLibs(Boolean.getBoolean("robovm.useDebugLibs"));
+            builder.dumpIntermediates(true);
+        }
 
         if (iosSkipSigning) {
             builder.iosSkipSigning(true);
