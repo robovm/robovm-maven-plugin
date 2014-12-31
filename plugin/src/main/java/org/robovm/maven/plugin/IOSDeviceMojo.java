@@ -40,7 +40,12 @@ public class IOSDeviceMojo extends AbstractRoboVMMojo {
 
         try {
 
-            Config config = buildArchive(OS.ios, Arch.thumbv7, TargetType.ios);
+            Arch arch = Arch.thumbv7;
+            if (archString != null && archString.equals(Arch.arm64.toString())) {
+                arch = Arch.arm64;
+            }
+            
+            Config config = buildArchive(OS.ios, arch, TargetType.ios);
             LaunchParameters launchParameters = config.getTarget()
                     .createLaunchParameters();
             config.getTarget().launch(launchParameters).waitFor();

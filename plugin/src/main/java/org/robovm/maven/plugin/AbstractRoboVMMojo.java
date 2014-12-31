@@ -122,6 +122,20 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected File installDir;
 
     /**
+     * Overrides the arch used when running the app. One of x86, x86_64, thumbv7, arm64.
+     * Will be ignored if the specified value isn't supported by the executed goal.
+     */
+    @Parameter(property="robovm.arch")
+    protected String archString;
+
+    /**
+     * Overrides the os used when running the app. One of macosx, linux, ios.
+     * Will be ignored if the specified value isn't supported by the executed goal.
+     */
+    @Parameter(property="robovm.os")
+    protected String osString;
+
+    /**
      * Whether or not to include the JavaFX libraries.
      */
     @Parameter(property="robovm.includeJFX")

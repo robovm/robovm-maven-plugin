@@ -53,7 +53,12 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            Config config = buildArchive(OS.ios, Arch.x86, TargetType.ios);
+            Arch arch = Arch.x86;
+            if (archString != null && archString.equals(Arch.x86_64.toString())) {
+                arch = Arch.x86_64;
+            }
+            
+            Config config = buildArchive(OS.ios, arch, TargetType.ios);
             IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters)
                 config.getTarget().createLaunchParameters();
 
