@@ -14,7 +14,7 @@
 
   <properties>
     <surefire.version>2.17</surefire.version>
-    <robovm.version>${project.version}</robovm.version>
+    <robovm.version>1.0.0-beta-02</robovm.version>
   </properties>
 
   <dependencies>
