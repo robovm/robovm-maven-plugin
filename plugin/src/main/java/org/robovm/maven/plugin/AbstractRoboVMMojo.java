@@ -126,14 +126,14 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
      * Will be ignored if the specified value isn't supported by the executed goal.
      */
     @Parameter(property="robovm.arch")
-    protected String archString;
+    protected String arch;
 
     /**
      * Overrides the os used when running the app. One of macosx, linux, ios.
      * Will be ignored if the specified value isn't supported by the executed goal.
      */
     @Parameter(property="robovm.os")
-    protected String osString;
+    protected String os;
 
     /**
      * Whether or not to include the JavaFX libraries.
