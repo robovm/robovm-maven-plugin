@@ -47,7 +47,7 @@ public class CreateIPAMojo extends AbstractRoboVMMojo {
 
         try {
 
-            Config config = buildArchive(OS.ios, Arch.thumbv7, TargetType.ios);
+            Config config = buildArchive(OS.ios, Arch.thumbv7, TargetType.ios).getConfig();
             IOSTarget target = (IOSTarget) config.getTarget();
             target.createIpa();
 

@@ -15,9 +15,12 @@
  */
 package org.robovm.maven.plugin;
 
+import java.util.List;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.TargetType;
@@ -25,9 +28,6 @@ import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.ios.DeviceType;
 import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
 import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
-
-import java.io.IOException;
-import java.util.List;
 
 public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
@@ -58,7 +58,8 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
                 arch = Arch.x86_64;
             }
             
-            Config config = buildArchive(OS.ios, arch, TargetType.ios);
+            AppCompiler compiler = buildArchive(OS.ios, arch, TargetType.ios);
+            Config config = compiler.getConfig();
             IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters)
                 config.getTarget().createLaunchParameters();
 
@@ -66,12 +67,10 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
             DeviceType deviceType = getBestDeviceType(
                 config.getHome(), deviceFamily, deviceName, sdk);
             launchParameters.setDeviceType(deviceType);
-            config.getTarget().launch(launchParameters).waitFor();
+            compiler.launch(launchParameters);
 
-        } catch (InterruptedException e) {
-            throw new MojoExecutionException("Failed to launch IOS Simulator", e);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Failed to launch IOS Simulator", e);
+        } catch (Throwable t) {
+            throw new MojoExecutionException("Failed to launch IOS Simulator", t);
         }
     }
 

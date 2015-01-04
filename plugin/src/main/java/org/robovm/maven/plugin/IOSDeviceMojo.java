@@ -20,13 +20,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.LaunchParameters;
-
-import java.io.IOException;
 
 /**
  * Compiles your application and deploys it to a connected iOS device.
@@ -45,15 +44,14 @@ public class IOSDeviceMojo extends AbstractRoboVMMojo {
                 arch = Arch.arm64;
             }
             
-            Config config = buildArchive(OS.ios, arch, TargetType.ios);
+            AppCompiler compiler = buildArchive(OS.ios, arch, TargetType.ios);
+            Config config = compiler.getConfig();
             LaunchParameters launchParameters = config.getTarget()
                     .createLaunchParameters();
-            config.getTarget().launch(launchParameters).waitFor();
+            compiler.launch(launchParameters);
 
-        } catch (InterruptedException e) {
-            throw new MojoExecutionException("Failed to launch IOS Device", e);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Failed to launch IOS Device", e);
+        } catch (Throwable t) {
+            throw new MojoExecutionException("Failed to launch IOS Device", t);
         }
     }
 }

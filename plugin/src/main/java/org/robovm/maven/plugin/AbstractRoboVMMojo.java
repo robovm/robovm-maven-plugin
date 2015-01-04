@@ -136,6 +136,23 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected String os;
 
     /**
+     * If set to {@code true} the app will be launched in debug mode. The app
+     * will suspend before the main method is called and will wait for a
+     * debugger to connect.
+     */
+    @Parameter(property="robovm.debug")
+    protected boolean debug;
+
+    /**
+     * The port to listen for debugger connections on when launching in debug
+     * mode using {@code debug=true}. If not set a default port will be used.
+     * The port actually used will be written to the console before the app is
+     * launched. 
+     */
+    @Parameter(property="robovm.debugPort")
+    protected int debugPort = -1;
+
+    /**
      * Whether or not to include the JavaFX libraries.
      */
     @Parameter(property="robovm.includeJFX")
@@ -147,7 +164,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return configBuilder.build();
     }
 
-    public Config buildArchive(OS os, Arch arch, TargetType targetType)
+    public AppCompiler buildArchive(OS os, Arch arch, TargetType targetType)
             throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
@@ -262,6 +279,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             builder.dumpIntermediates(true);
         }
 
+        if (debug) {
+            builder.debug(true);
+            if (debugPort != -1) {
+                builder.addPluginArgument("debug:jdwpport=" + debugPort);
+            }
+        }
+        
         if (iosSkipSigning) {
             builder.iosSkipSigning(true);
         } else {
@@ -369,7 +393,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             AppCompiler compiler = new AppCompiler(config);
             compiler.compile();
 
-            return config;
+            return compiler;
 
         } catch (IOException e) {
             throw new MojoExecutionException(
