@@ -98,6 +98,8 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     /**
      * The identity to sign the app as when building an iOS bundle for the app.
+     * Default is to look for an identity starting with 'iPhone Developer' or
+     * 'iOS Development'. Enclose in '/' to search by regexp, e.g. '/foo|bar/'.
      */
     @Parameter(property="robovm.iosSignIdentity")
     protected String iosSignIdentity;
