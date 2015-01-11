@@ -162,21 +162,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
     private Logger roboVMLogger;
 
-    protected Config configure(Config.Builder configBuilder) throws IOException {
-        return configBuilder.build();
-    }
-
-    public AppCompiler buildArchive(OS os, Arch arch, TargetType targetType)
-            throws MojoExecutionException, MojoFailureException {
-
-        getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
-
-        Config.Builder builder;
-        try {
-            builder = new Config.Builder();
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
+    protected Config.Builder configure(Config.Builder builder) throws MojoExecutionException {
         builder.logger(getRoboVMLogger());
 
         // load config base file if it exists (and properties)
@@ -256,7 +242,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             }
         }
 
-        File tmpDir = new File(new File(installDir, os.name()), arch.name());
+        File tmpDir = new File(project.getBuild().getDirectory(), "robovm.tmp");
         try {
             FileUtils.deleteDirectory(tmpDir);
         } catch (IOException e) {
@@ -274,8 +260,8 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         }
         builder.home(home)
                 .tmpDir(tmpDir)
-                .targetType(targetType).skipInstall(true)
-                .installDir(installDir).os(os).arch(arch);
+                .skipInstall(true)
+                .installDir(installDir);
         if (home.isDev()) {
             builder.useDebugLibs(Boolean.getBoolean("robovm.useDebugLibs"));
             builder.dumpIntermediates(true);
@@ -309,65 +295,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         builder.clearClasspathEntries();
 
-        // add JavaFX if needed
-
-        if (includeJFX) {
-
-            getLog().info("Including JavaFX Runtime in build");
-
-            // add jfxrt.jar from 78 backport to classpath
-            File jfxJar = resolveJavaFXBackportRuntimeArtifact();
-            getLog().debug("JavaFX backport runtime JAR found at: " + jfxJar);
-            builder.addClasspathEntry(jfxJar);
-
-            // add backport compatibility additions to classpath
-            File jfxCompatJar = resolveJavaFXBackportCompatibilityArtifact();
-            getLog().debug(
-                    "JavaFX backport compatibilty JAR found at: "
-                            + jfxCompatJar);
-            builder.addClasspathEntry(jfxCompatJar);
-
-            // include native files as resources
-
-            File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
-            // builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" +
-            // arch.getClangName() + ".a").getAbsolutePath());
-            builder.addLib(new Lib(new File(iosNativesBaseDir, "libglass-"
-                    + arch.getClangName() + ".a").getAbsolutePath(), true));
-            builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-font-"
-                    + arch.getClangName() + ".a").getAbsolutePath(), true));
-            builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-iio-"
-                    + arch.getClangName() + ".a").getAbsolutePath(), true));
-            builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-common-"
-                    + arch.getClangName() + ".a").getAbsolutePath(), true));
-            builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-es2-"
-                    + arch.getClangName() + ".a").getAbsolutePath(), true));
-            // builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" +
-            // arch.getClangName() + ".a").getAbsolutePath());
-
-            // add default 'roots' needed for JFX to work
-            builder.addForceLinkClass("com.sun.javafx.tk.quantum.QuantumToolkit");
-            builder.addForceLinkClass("com.sun.prism.es2.ES2Pipeline");
-            builder.addForceLinkClass("com.sun.prism.es2.IOSGLFactory");
-            builder.addForceLinkClass("com.sun.glass.ui.ios.**.*");
-            builder.addForceLinkClass("javafx.scene.CssStyleHelper");
-            builder.addForceLinkClass("com.sun.prism.shader.**.*");
-            builder.addForceLinkClass("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
-            builder.addForceLinkClass("com.sun.javafx.font.coretext.CTFactory");
-            builder.addForceLinkClass("sun.util.logging.PlatformLogger");
-
-            // add default 'frameworks' needed for JFX to work
-            builder.addFramework("UIKit");
-            builder.addFramework("OpenGLES");
-            builder.addFramework("QuartzCore");
-            builder.addFramework("CoreGraphics");
-            builder.addFramework("CoreText");
-            builder.addFramework("ImageIO");
-            builder.addFramework("MobileCoreServices");
-
-            // todo do we need to exclude built-in JFX from JDK classpath?
-        }
-
         // configure the runtime classpath
 
         try {
@@ -384,6 +311,86 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             throw new MojoExecutionException(
                     "Error resolving application classpath for RoboVM build", e);
         }
+        
+        return builder;
+    }
+
+    protected Config.Builder includeJFX(Config.Builder builder, Arch arch) throws MojoExecutionException {
+        getLog().info("Including JavaFX Runtime in build");
+
+        // add jfxrt.jar from 78 backport to classpath
+        File jfxJar = resolveJavaFXBackportRuntimeArtifact();
+        getLog().debug("JavaFX backport runtime JAR found at: " + jfxJar);
+        builder.addClasspathEntry(jfxJar);
+
+        // add backport compatibility additions to classpath
+        File jfxCompatJar = resolveJavaFXBackportCompatibilityArtifact();
+        getLog().debug(
+                "JavaFX backport compatibilty JAR found at: "
+                        + jfxCompatJar);
+        builder.addClasspathEntry(jfxCompatJar);
+
+        // include native files as resources
+
+        File iosNativesBaseDir = unpackJavaFXNativeIOSArtifact();
+        // builder.addLib(new File(iosNativesBaseDir, "libdecora-sse-" +
+        // arch.getClangName() + ".a").getAbsolutePath());
+        builder.addLib(new Lib(new File(iosNativesBaseDir, "libglass-"
+                + arch.getClangName() + ".a").getAbsolutePath(), true));
+        builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-font-"
+                + arch.getClangName() + ".a").getAbsolutePath(), true));
+        builder.addLib(new Lib(new File(iosNativesBaseDir, "libjavafx-iio-"
+                + arch.getClangName() + ".a").getAbsolutePath(), true));
+        builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-common-"
+                + arch.getClangName() + ".a").getAbsolutePath(), true));
+        builder.addLib(new Lib(new File(iosNativesBaseDir, "libprism-es2-"
+                + arch.getClangName() + ".a").getAbsolutePath(), true));
+        // builder.addLib(new File(iosNativesBaseDir, "libprism-sw-" +
+        // arch.getClangName() + ".a").getAbsolutePath());
+
+        // add default 'roots' needed for JFX to work
+        builder.addForceLinkClass("com.sun.javafx.tk.quantum.QuantumToolkit");
+        builder.addForceLinkClass("com.sun.prism.es2.ES2Pipeline");
+        builder.addForceLinkClass("com.sun.prism.es2.IOSGLFactory");
+        builder.addForceLinkClass("com.sun.glass.ui.ios.**.*");
+        builder.addForceLinkClass("javafx.scene.CssStyleHelper");
+        builder.addForceLinkClass("com.sun.prism.shader.**.*");
+        builder.addForceLinkClass("com.sun.scenario.effect.impl.es2.ES2ShaderSource");
+        builder.addForceLinkClass("com.sun.javafx.font.coretext.CTFactory");
+        builder.addForceLinkClass("sun.util.logging.PlatformLogger");
+
+        // add default 'frameworks' needed for JFX to work
+        builder.addFramework("UIKit");
+        builder.addFramework("OpenGLES");
+        builder.addFramework("QuartzCore");
+        builder.addFramework("CoreGraphics");
+        builder.addFramework("CoreText");
+        builder.addFramework("ImageIO");
+        builder.addFramework("MobileCoreServices");
+
+        // todo do we need to exclude built-in JFX from JDK classpath?
+        
+        return builder;
+    }
+    
+    public AppCompiler buildArchive(OS os, Arch arch, TargetType targetType)
+            throws MojoExecutionException, MojoFailureException {
+
+        getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
+
+        Config.Builder builder;
+        try {
+            builder = new Config.Builder();
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+
+        configure(builder).os(os).arch(arch).targetType(targetType);
+        
+        // add JavaFX if needed
+        if (includeJFX) {
+            includeJFX(builder, arch);
+        }
 
         // execute the RoboVM build
 
@@ -391,8 +398,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
             getLog().info(
                     "Compiling RoboVM app, this could take a while, especially the first time round");
-            Config config = configure(builder);
-            AppCompiler compiler = new AppCompiler(config);
+            AppCompiler compiler = new AppCompiler(builder.build());
             compiler.compile();
 
             return compiler;

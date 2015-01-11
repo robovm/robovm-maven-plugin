@@ -15,19 +15,21 @@
  */
 package org.robovm.maven.plugin;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
-import org.robovm.compiler.config.Config.Builder;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.Config;
+import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
-import org.robovm.compiler.target.ios.IOSTarget;
-
-import java.io.IOException;
 
 /**
  * Compiles your application and creates an IPA file suitable for upload to the app store.
@@ -36,20 +38,34 @@ import java.io.IOException;
       requiresDependencyResolution=ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class CreateIPAMojo extends AbstractRoboVMMojo {
 
-    @Override
-    protected Config configure(Builder configBuilder) throws IOException {
-        configBuilder.skipInstall(false);
-        return super.configure(configBuilder);
-    }
-
+    /**
+     * Colon separated list of architectures to include in the IPA. Either
+     * thumbv7 or arm64 or both.
+     */
+    @Parameter(property="robovm.ipaArchs")
+    protected String ipaArchs;
+    
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         try {
 
-            Config config = buildArchive(OS.ios, Arch.thumbv7, TargetType.ios).getConfig();
-            IOSTarget target = (IOSTarget) config.getTarget();
-            target.createIpa();
+            Config.Builder builder = configure(new Config.Builder())
+                    .skipInstall(false)
+                    .os(OS.ios)
+                    .targetType(TargetType.ios);
+            
+            List<Arch> archs = new ArrayList<>();
+            if (ipaArchs == null || ipaArchs.trim().isEmpty()) {
+                archs.add(Arch.thumbv7);
+            } else {
+                for (String s : ipaArchs.trim().split(":")) {
+                    archs.add(Arch.valueOf(s));
+                }
+            }
+            
+            AppCompiler compiler = new AppCompiler(builder.build());
+            compiler.createIpa(archs);
 
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to create IPA", e);
