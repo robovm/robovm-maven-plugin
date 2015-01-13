@@ -15,8 +15,6 @@
  */
 package org.robovm.maven.plugin;
 
-import java.util.List;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -64,41 +62,13 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
                 config.getTarget().createLaunchParameters();
 
             // select the device based on the (optional) SDK version and (optional) device type
-            DeviceType deviceType = getBestDeviceType(
-                config.getHome(), deviceFamily, deviceName, sdk);
+            DeviceType deviceType = DeviceType.getBestDeviceType(config.getHome(), 
+                    arch, deviceFamily, deviceName, sdk);
             launchParameters.setDeviceType(deviceType);
             compiler.launch(launchParameters);
 
         } catch (Throwable t) {
             throw new MojoExecutionException("Failed to launch IOS Simulator", t);
         }
-    }
-
-    private DeviceType getBestDeviceType(Config.Home home, DeviceFamily family,
-                                         String deviceName, String sdk)
-        throws MojoFailureException {
-        List<DeviceType> devices = DeviceType.listDeviceTypes(home);
-        if (devices.isEmpty()) {
-            throw new MojoFailureException("Unable to enumerate simulator devices");
-        }
-        DeviceType best = null;
-        for (DeviceType dt : devices) {
-            if (dt.getFamily() != family) continue;
-            boolean nameMatch = (deviceName == null) || deviceName.equals(dt.getSimpleDeviceName());
-            boolean sdkMatch = (sdk == null) || sdk.equals(dt.getSdk().getVersion());
-            if (!nameMatch || !sdkMatch) continue;
-            // if we have an existing match, we need to check whether this match is "better"; that
-            // only happens when we have not specified an SDK, in which case we want the match with
-            // the newest SDK
-            if (best == null ||
-                dt.getSdk().getVersion().compareTo(best.getSdk().getVersion()) > 0) {
-                best = dt;
-            }
-        }
-        if (best == null) {
-            throw new MojoFailureException("Unable to find a matching device [name=" + deviceName +
-                ", sdk=" + sdk + "]");
-        }
-        return best;
     }
 }
