@@ -16,7 +16,7 @@
 
   <groupId>org.robovm</groupId>
   <artifactId>robovm-maven-parent</artifactId>
-  <version>1.0.0-beta-03</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>RoboVM Maven</name>
   <packaging>pom</packaging>
 
