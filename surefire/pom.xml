@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.robovm</groupId>
     <artifactId>robovm-maven-parent</artifactId>
-    <version>1.0.0-beta-04</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>robovm-surefire-provider</artifactId>
@@ -14,7 +14,7 @@
 
   <properties>
     <surefire.version>2.17</surefire.version>
-    <robovm.version>1.0.0-beta-04</robovm.version>
+    <robovm.version>1.0.0-SNAPSHOT</robovm.version>
   </properties>
 
   <dependencies>
