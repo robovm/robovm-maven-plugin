@@ -143,7 +143,6 @@
 
   <modules>
     <module>plugin</module>
-    <module>resolver</module>
     <module>surefire</module>
   </modules>
 
