@@ -140,10 +140,12 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     /**
      * If set to {@code true} the app will be launched in debug mode. The app
      * will suspend before the main method is called and will wait for a
-     * debugger to connect.
+     * debugger to connect. If set to {@code "clientmode"} then the application
+     * will connect back to the local host to attach to already started
+     * debugging server which is waiting for connection on <code>robovm.debugPort</code>.
      */
     @Parameter(property="robovm.debug")
-    protected boolean debug;
+    protected String debug;
 
     /**
      * The port to listen for debugger connections on when launching in debug
@@ -267,10 +269,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             builder.dumpIntermediates(true);
         }
 
-        if (debug) {
+        if (debug != null && !debug.equals("false")) {
             builder.debug(true);
             if (debugPort != -1) {
                 builder.addPluginArgument("debug:jdwpport=" + debugPort);
+            }
+            if ("clientmode".equals(debug)) {
+                builder.addPluginArgument("debug:clientmode=true");
             }
         }
         
