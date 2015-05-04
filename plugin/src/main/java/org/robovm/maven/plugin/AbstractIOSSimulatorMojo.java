@@ -62,7 +62,7 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
                 config.getTarget().createLaunchParameters();
 
             // select the device based on the (optional) SDK version and (optional) device type
-            DeviceType deviceType = DeviceType.getBestDeviceType(config.getHome(), 
+            DeviceType deviceType = DeviceType.getBestDeviceType(
                     arch, deviceFamily, deviceName, sdk);
             launchParameters.setDeviceType(deviceType);
             compiler.launch(launchParameters);
