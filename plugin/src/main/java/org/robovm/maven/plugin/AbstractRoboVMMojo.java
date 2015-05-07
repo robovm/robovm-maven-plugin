@@ -157,7 +157,9 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected int debugPort = -1;
 
     /**
-     * Whether or not to include the JavaFX libraries.
+     * Whether or not to include the JavaFX libraries. NOTE! This is deprecated
+     * and will be removed in the near future. Please migrate to the
+     * <code>jfxmobile</code> Gradle plugin.
      */
     @Parameter(property="robovm.includeJFX")
     protected boolean includeJFX;
@@ -321,6 +323,10 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     }
 
     protected Config.Builder includeJFX(Config.Builder builder, Arch arch) throws MojoExecutionException {
+        getLog().warn("The includeJFX functionality is deprecated and will be "
+                + "removed in the near future. Please migrate to the jfxmobile "
+                + "Gradle plugin.");
+
         getLog().info("Including JavaFX Runtime in build");
 
         // add jfxrt.jar from 78 backport to classpath
