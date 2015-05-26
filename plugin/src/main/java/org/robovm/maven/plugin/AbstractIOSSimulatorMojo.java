@@ -51,9 +51,9 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            Arch arch = Arch.x86;
-            if (super.arch != null && super.arch.equals(Arch.x86_64.toString())) {
-                arch = Arch.x86_64;
+            Arch arch = Arch.x86_64;
+            if (super.arch != null && super.arch.equals(Arch.x86.toString())) {
+                arch = Arch.x86;
             }
             
             AppCompiler compiler = buildArchive(OS.ios, arch, TargetType.ios);
