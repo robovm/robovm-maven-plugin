@@ -11,7 +11,7 @@
   </parent>
 
   <properties>
-    <robovm.version>${project.version}</robovm.version>
+    <robovm.version>1.5.0</robovm.version>
   </properties>
 
   <groupId>org.robovm</groupId>
