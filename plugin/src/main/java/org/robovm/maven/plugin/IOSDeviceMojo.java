@@ -23,9 +23,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.LaunchParameters;
+import org.robovm.compiler.target.ios.IOSTarget;
 
 /**
  * Compiles your application and deploys it to a connected iOS device.
@@ -44,7 +44,7 @@ public class IOSDeviceMojo extends AbstractRoboVMMojo {
                 arch = Arch.arm64;
             }
             
-            AppCompiler compiler = buildArchive(OS.ios, arch, TargetType.ios);
+            AppCompiler compiler = buildArchive(OS.ios, arch, IOSTarget.TYPE);
             Config config = compiler.getConfig();
             LaunchParameters launchParameters = config.getTarget()
                     .createLaunchParameters();

@@ -21,11 +21,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.ios.DeviceType;
 import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
 import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
+import org.robovm.compiler.target.ios.IOSTarget;
 
 public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
 
@@ -56,7 +56,7 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
                 arch = Arch.x86;
             }
             
-            AppCompiler compiler = buildArchive(OS.ios, arch, TargetType.ios);
+            AppCompiler compiler = buildArchive(OS.ios, arch, IOSTarget.TYPE);
             Config config = compiler.getConfig();
             IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters)
                 config.getTarget().createLaunchParameters();

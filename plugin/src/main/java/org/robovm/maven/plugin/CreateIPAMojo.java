@@ -28,8 +28,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
+import org.robovm.compiler.target.ios.IOSTarget;
 
 /**
  * Compiles your application and creates an IPA file suitable for upload to the app store.
@@ -53,7 +53,7 @@ public class CreateIPAMojo extends AbstractRoboVMMojo {
             Config.Builder builder = configure(new Config.Builder())
                     .skipInstall(false)
                     .os(OS.ios)
-                    .targetType(TargetType.ios);
+                    .targetType(IOSTarget.TYPE);
             
             List<Arch> archs = new ArrayList<>();
             if (ipaArchs == null || ipaArchs.trim().isEmpty()) {

@@ -49,7 +49,6 @@ import org.robovm.compiler.Version;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.Config.Home;
-import org.robovm.compiler.config.Config.TargetType;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
@@ -313,7 +312,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return builder;
     }
 
-    public AppCompiler buildArchive(OS os, Arch arch, TargetType targetType)
+    public AppCompiler buildArchive(OS os, Arch arch, String targetType)
             throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
