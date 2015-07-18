@@ -380,44 +380,6 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return resolveArtifact(artifact);
     }
 
-    protected File resolveJavaFXBackportRuntimeArtifact()
-            throws MojoExecutionException {
-
-        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
-                "openjfx-78-backport", "1.8.0-ea-b96.1", "", "jar", "ios",
-                handler);
-        return resolveArtifact(artifact).getFile();
-    }
-
-    protected File resolveJavaFXBackportCompatibilityArtifact()
-            throws MojoExecutionException {
-
-        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
-                "openjfx-78-backport-compat", "1.8.0.1", "", "jar", "", handler);
-        return resolveArtifact(artifact).getFile();
-    }
-
-    protected File resolveJavaFXNativeArtifact() throws MojoExecutionException {
-
-        MavenArtifactHandler handler = new MavenArtifactHandler("jar");
-        Artifact artifact = new DefaultArtifact("net.java.openjfx.backport",
-                "openjfx-78-backport-native", "1.8.0-ea-b96.1", "", "jar",
-                "ios", handler);
-        return resolveArtifact(artifact).getFile();
-    }
-
-    protected File unpackJavaFXNativeIOSArtifact()
-            throws MojoExecutionException {
-
-        File jarFile = resolveJavaFXNativeArtifact();
-        // by default unpack into the local repo directory
-        File unpackBaseDir = new File(jarFile.getParent(), "unpacked");
-        unpack(jarFile, unpackBaseDir);
-        return unpackBaseDir;
-    }
-
     protected Artifact resolveArtifact(Artifact artifact)
             throws MojoExecutionException {
 
