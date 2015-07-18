@@ -312,7 +312,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
         return builder;
     }
 
-    public AppCompiler buildArchive(OS os, Arch arch, String targetType)
+    protected AppCompiler build(OS os, Arch arch, String targetType)
             throws MojoExecutionException, MojoFailureException {
 
         getLog().info("Building RoboVM app for: " + os + " (" + arch + ")");
