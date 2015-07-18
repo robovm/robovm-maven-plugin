@@ -36,6 +36,8 @@ ${project.name}
 
   * {{{./ios-device-mojo.html}robovm:ios-device}} compile and deploy your app to an iOS device.
 
+  * {{{./console-mojo.html}robovm:console}} compile and launch a console app on the console.
+
   * {{{./create-ipa-mojo.html}robovm:create-ipa}} compile and bundle your app into an IPA file.
 
   []
