@@ -40,6 +40,8 @@ ${project.name}
 
   * {{{./create-ipa-mojo.html}robovm:create-ipa}} compile and bundle your app into an IPA file.
 
+  * {{{./build-mojo.html}robovm:console}} compile an app or binary and install it to <<target/robovm>> or the specified install dir.
+
   []
 
 * Usage
