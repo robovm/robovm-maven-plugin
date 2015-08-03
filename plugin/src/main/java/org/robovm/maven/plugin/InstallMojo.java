@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 RoboVM AB.
+ * Copyright (C) 2015 RoboVM AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,17 @@ package org.robovm.maven.plugin;
 
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
- * Compiles your application and creates an IPA file suitable for upload to the app store.
+ * Builds the app or binary as specified by the RoboVM config and installs it to
+ * the install dir (usually <code>target/robovm</code>).
  */
-@Mojo(name="create-ipa", defaultPhase=LifecyclePhase.PACKAGE,
-      requiresDependencyResolution=ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class CreateIPAMojo extends ArchiveMojo {
-
-    /**
-     * Colon separated list of architectures to include in the IPA. Either
-     * thumbv7 or arm64 or both.
-     */
-    @Parameter(property="robovm.ipaArchs")
-    protected String ipaArchs;
-    
+@Mojo(name = "install", defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+public class InstallMojo extends AbstractRoboVMBuildMojo {
     @Override
-    protected String getArchs() {
-        if (ipaArchs != null) {
-            return ipaArchs;
-        }
-        return super.getArchs();
+    protected boolean shouldArchive() {
+        return false;
     }
-
 }

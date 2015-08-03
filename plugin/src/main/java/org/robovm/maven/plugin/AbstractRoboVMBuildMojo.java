@@ -15,22 +15,36 @@
  */
 package org.robovm.maven.plugin;
 
-import org.apache.commons.io.FileUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.AppCompiler;
+import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
 
 /**
- * Goal which builds the app or binary as specified by the RoboVM config and
- * installs it to the install dir (usually <code>target/robovm</code>.
+ * Abstract mojo which either archives or installs.
  */
-@Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE,
-        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class BuildMojo extends AbstractRoboVMMojo {
+public abstract class AbstractRoboVMBuildMojo extends AbstractRoboVMMojo {
+
+    /**
+     * Colon separated list of architectures to include in the archive.
+     */
+    @Parameter(property="robovm.archs")
+    protected String archs;
+
+    protected String getArchs() {
+        return archs;
+    }
+
+    protected abstract boolean shouldArchive();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -39,17 +53,29 @@ public class BuildMojo extends AbstractRoboVMMojo {
 
             Config.Builder builder = configure(new Config.Builder())
                     .skipInstall(false);
-
-            AppCompiler compiler = new AppCompiler(builder.build());
-            compiler.compile();
-            Config config = compiler.getConfig();
-            if (config.getInstallDir().exists()) {
-                FileUtils.cleanDirectory(config.getInstallDir());
+            
+            if (getArchs() != null) {
+                List<Arch> archs = new ArrayList<>();
+                for (String s : getArchs().trim().split(":")) {
+                    archs.add(Arch.valueOf(s));
+                }
+                builder.archs(archs);
             }
-            config.getTarget().install();
+            
+            AppCompiler compiler = new AppCompiler(builder.build());
+            compiler.build();
+            if (shouldArchive()) {
+                compiler.archive();
+            } else {
+                compiler.install();
+            }
 
-        } catch (Throwable t) {
-            throw new MojoExecutionException("Failed to build", t);
+        } catch (IOException e) {
+            if (shouldArchive()) {
+                throw new MojoExecutionException("Failed to create archive", e);
+            } else {
+                throw new MojoExecutionException("Failed to install", e);
+            }
         }
     }
 }

@@ -156,7 +156,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             config.getLogger().info("Building RoboVM tests for: %s (%s)", config.getOs(), config.getArch());
             config.getLogger().info("This could take a while, especially the first time round");
             AppCompiler appCompiler = new AppCompiler(config);
-            appCompiler.compile();
+            appCompiler.build();
             
             LaunchParameters launchParameters = config.getTarget().createLaunchParameters();
             if (Boolean.getBoolean(PROP_SERVER_DEBUG)) {

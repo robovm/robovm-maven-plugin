@@ -333,7 +333,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             getLog().info(
                     "Compiling RoboVM app, this could take a while, especially the first time round");
             AppCompiler compiler = new AppCompiler(builder.build());
-            compiler.compile();
+            compiler.build();
 
             return compiler;
 
