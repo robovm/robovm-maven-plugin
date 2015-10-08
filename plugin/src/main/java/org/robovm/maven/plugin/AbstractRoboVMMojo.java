@@ -161,6 +161,10 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         // load config base file if it exists (and properties)
 
+        if (os != null) {
+            builder.os(OS.valueOf(os));
+        }
+
         if (propertiesFile != null) {
             if (!propertiesFile.exists()) {
                 throw new MojoExecutionException(
