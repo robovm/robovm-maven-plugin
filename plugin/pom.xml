@@ -22,7 +22,7 @@
   <inceptionYear>2013</inceptionYear>
 
   <properties>
-    <robovm.version>${project.version}</robovm.version>
+    <robovm.version>1.9.0</robovm.version>
   </properties>
 
   <repositories>
