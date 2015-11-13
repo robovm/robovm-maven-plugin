@@ -42,6 +42,10 @@ ${project.name}
 
   * {{{./install-mojo.html}robovm:install}} compile an app or binary and install it to <<target/robovm>> or the specified install dir.
 
+  * {{{./activate-mojo.html}robovm:activate}} activate your license.
+
+  * {{{./deactivate-mojo.html}robovm:deactivate}} deactivate your license.
+
   []
 
 * Usage
