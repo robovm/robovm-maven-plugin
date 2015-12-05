@@ -21,10 +21,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.robovm.compiler.AppCompiler;
 import org.robovm.compiler.config.Arch;
 import org.robovm.compiler.config.Config;
@@ -39,6 +36,13 @@ public abstract class AbstractRoboVMBuildMojo extends AbstractRoboVMMojo {
      */
     @Parameter(property="robovm.archs")
     protected String archs;
+
+    /**
+     * If set to {@code true} bitcode will be generated in the linked binary.
+     * The default is {@code false}.
+     */
+    @Parameter(property="robovm.enableBitcode")
+    protected boolean enableBitcode = false;
 
     protected String getArchs() {
         return archs;
@@ -61,6 +65,7 @@ public abstract class AbstractRoboVMBuildMojo extends AbstractRoboVMMojo {
                 }
                 builder.archs(archs);
             }
+            builder.enableBitcode(enableBitcode);
             
             AppCompiler compiler = new AppCompiler(builder.build());
             compiler.build();

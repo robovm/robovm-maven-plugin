@@ -15,12 +15,10 @@
  */
 package org.robovm.maven.plugin;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.robovm.compiler.config.Config.Builder;
 
 /**
  * Compiles your application and creates an IPA file suitable for upload to the app store.
@@ -35,20 +33,6 @@ public class CreateIPAMojo extends ArchiveMojo {
      */
     @Parameter(property="robovm.ipaArchs")
     protected String ipaArchs;
-
-    /**
-     * If set to {@code true} bitcode will be generated in the linked binary.
-     * The default is {@code false}.
-     */
-    @Parameter(property="robovm.enableBitcode")
-    protected boolean enableBitcode = false;
-
-    @Override
-    protected Builder configure(Builder builder) throws MojoExecutionException {
-        super.configure(builder);
-        builder.enableBitcode(enableBitcode);
-        return builder;
-    }
 
     @Override
     protected String getArchs() {
