@@ -24,7 +24,7 @@ import org.robovm.compiler.config.Config;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.target.ios.DeviceType;
 import org.robovm.compiler.target.ios.DeviceType.DeviceFamily;
-import org.robovm.compiler.target.ios.IOSSimulatorLaunchParameters;
+import org.robovm.compiler.target.ios.SimulatorLaunchParameters;
 import org.robovm.compiler.target.ios.IOSTarget;
 
 public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
@@ -58,12 +58,12 @@ public abstract class AbstractIOSSimulatorMojo extends AbstractRoboVMMojo {
             
             AppCompiler compiler = build(OS.ios, arch, IOSTarget.TYPE);
             Config config = compiler.getConfig();
-            IOSSimulatorLaunchParameters launchParameters = (IOSSimulatorLaunchParameters)
+            SimulatorLaunchParameters launchParameters = (SimulatorLaunchParameters)
                 config.getTarget().createLaunchParameters();
 
             // select the device based on the (optional) SDK version and (optional) device type
             DeviceType deviceType = DeviceType.getBestDeviceType(
-                    arch, deviceFamily, deviceName, sdk);
+                    arch, OS.ios, deviceFamily, deviceName, sdk);
             launchParameters.setDeviceType(deviceType);
             compiler.launch(launchParameters);
 
