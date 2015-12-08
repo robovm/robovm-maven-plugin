@@ -95,25 +95,26 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected File configFile;
 
     /**
-     * The identity to sign the app as when building an iOS bundle for the app.
-     * Default is to look for an identity starting with 'iPhone Developer' or
-     * 'iOS Development'. Enclose in '/' to search by regexp, e.g. '/foo|bar/'.
+     * The identity to sign the app as when building an iOS or tvOS bundle for
+     * the app. Default is to look for an identity starting with 'iPhone
+     * Developer' or 'iOS Development'. Enclose in '/' to search by regexp, e.g.
+     * '/foo|bar/'.
      */
-    @Parameter(property="robovm.iosSignIdentity")
-    protected String iosSignIdentity;
+    @Parameter(property="robovm.signIdentity", alias="robovm.iosSignIdentity")
+    protected String signIdentity;
 
     /**
      * The provisioning profile to use when building for device.
      */
-    @Parameter(property="robovm.iosProvisioningProfile")
-    protected String iosProvisioningProfile;
+    @Parameter(property="robovm.provisioningProfile", alias="robovm.iosProvisioningProfile")
+    protected String provisioningProfile;
 
     /**
      * Whether the app should be signed or not. Unsigned apps can only be run on jailbroken
      * devices.
      */
-    @Parameter(property="robovm.iosSkipSigning")
-    protected boolean iosSkipSigning = false;
+    @Parameter(property="robovm.skipSigning", alias="robovm.iosSkipSigning")
+    protected boolean skipSigning = false;
 
     /**
      * The directory into which the RoboVM distributable for the project will be built.
@@ -129,7 +130,7 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected String arch;
 
     /**
-     * Overrides the os used when running the app. One of macosx, linux, ios.
+     * Overrides the os used when running the app. One of macosx, linux, ios, tvos.
      * Will be ignored if the specified value isn't supported by the executed goal.
      */
     @Parameter(property="robovm.os")
@@ -275,22 +276,22 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             }
         }
         
-        if (iosSkipSigning) {
+        if (skipSigning) {
             builder.iosSkipSigning(true);
         } else {
-            if (iosSignIdentity != null) {
+            if (signIdentity != null) {
                 getLog().debug(
-                        "Using explicit iOS Signing identity: " + iosSignIdentity);
+                        "Using explicit signing identity: " + signIdentity);
                 builder.iosSignIdentity(SigningIdentity.find(
-                        SigningIdentity.list(), iosSignIdentity));
+                        SigningIdentity.list(), signIdentity));
             }
 
-            if (iosProvisioningProfile != null) {
+            if (provisioningProfile != null) {
                 getLog().debug(
-                        "Using explicit iOS provisioning profile: "
-                                + iosProvisioningProfile);
+                        "Using explicit provisioning profile: "
+                                + provisioningProfile);
                 builder.iosProvisioningProfile(ProvisioningProfile.find(
-                        ProvisioningProfile.list(), iosProvisioningProfile));
+                        ProvisioningProfile.list(), provisioningProfile));
             }
         }
 
