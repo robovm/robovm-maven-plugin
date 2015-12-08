@@ -389,6 +389,9 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
 
         ArtifactResolutionRequest request = new ArtifactResolutionRequest();
         request.setArtifact(artifact);
+        if (artifact.isSnapshot()) {
+            request.setForceUpdate(true);
+        }
         request.setLocalRepository(localRepository);
         final List<ArtifactRepository> remoteRepositories = project
                 .getRemoteArtifactRepositories();
