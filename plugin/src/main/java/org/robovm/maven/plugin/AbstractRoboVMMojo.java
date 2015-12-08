@@ -117,6 +117,23 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected boolean skipSigning = false;
 
     /**
+     * Keychain password to use when unlocking the codesign keychain. May be
+     * needed during headless build. The compiler will also look for a
+     * KEYCHAIN_PASSWORD env variable if this property hasn't been specified.
+     */
+    @Parameter(property="robovm.keychainPassword")
+    protected String keychainPassword;
+
+    /**
+     * Read the keychain password to use when unlocking the codesign keychain
+     * from the specified file. May be needed during headless build. The
+     * compiler will also look for a KEYCHAIN_PASSWORD env variable if this
+     * property hasn't been specified.
+     */
+    @Parameter(property="robovm.keychainPasswordFile")
+    protected File keychainPasswordFile;
+
+    /**
      * The directory into which the RoboVM distributable for the project will be built.
      */
     @Parameter(property="robovm.installDir", defaultValue="${project.build.directory}/robovm")
@@ -292,6 +309,12 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
                                 + provisioningProfile);
                 builder.iosProvisioningProfile(ProvisioningProfile.find(
                         ProvisioningProfile.list(), provisioningProfile));
+            }
+
+            if (keychainPassword != null) {
+                builder.keychainPassword(keychainPassword);
+            } else if (keychainPasswordFile != null) {
+                builder.keychainPasswordFile(keychainPasswordFile);
             }
         }
 
