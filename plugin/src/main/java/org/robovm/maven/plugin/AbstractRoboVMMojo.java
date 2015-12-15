@@ -140,6 +140,13 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
     protected File installDir;
 
     /**
+     * The directory where cached compiled class files will be placed. Default
+     * is ~/.robovm/cache.
+     */
+    @Parameter(property="robovm.cacheDir")
+    protected File cacheDir;
+
+    /**
      * Overrides the arch used when running the app. One of x86, x86_64, thumbv7, arm64.
      * Will be ignored if the specified value isn't supported by the executed goal.
      */
@@ -316,6 +323,10 @@ public abstract class AbstractRoboVMMojo extends AbstractMojo {
             } else if (keychainPasswordFile != null) {
                 builder.keychainPasswordFile(keychainPasswordFile);
             }
+        }
+
+        if (cacheDir != null) {
+            builder.cacheDir(cacheDir);
         }
 
         builder.clearClasspathEntries();
