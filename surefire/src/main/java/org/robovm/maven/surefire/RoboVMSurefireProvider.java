@@ -74,6 +74,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
     private final static String PROP_IOS_SIGNING_IDENTITY = "robovm.test.iosSignIdentity";
     private final static String PROP_IOS_PROVISIONING_PROFILE = "robovm.test.iosProvisioningProfile";
     private final static String PROP_IOS_SKIP_SIGNING = "robovm.test.iosSkipSigning";
+    private final static String PROP_CACHE_DIR = "robovm.test.cacheDir";
 
     private final ClassLoader testClassLoader;
     private final List<org.junit.runner.notification.RunListener> customRunListeners;
@@ -313,6 +314,12 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             }
         }
         
+        if (System.getProperty(PROP_CACHE_DIR) != null) {
+            File cacheDir = new File(System.getProperty(PROP_CACHE_DIR));
+            logger.debug("Using explicit cache dir: " + cacheDir);
+            configBuilder.cacheDir(cacheDir);
+        }
+
         // Ignore any classpath entries in the loaded robovm.xml file.
         configBuilder.clearClasspathEntries();
         
