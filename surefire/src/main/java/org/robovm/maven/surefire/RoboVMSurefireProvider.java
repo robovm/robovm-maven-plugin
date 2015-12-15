@@ -75,6 +75,8 @@ public class RoboVMSurefireProvider extends AbstractProvider {
     private final static String PROP_IOS_PROVISIONING_PROFILE = "robovm.test.iosProvisioningProfile";
     private final static String PROP_IOS_SKIP_SIGNING = "robovm.test.iosSkipSigning";
     private final static String PROP_CACHE_DIR = "robovm.test.cacheDir";
+    private final static String PROP_KEYCHAIN_PASSWORD = "robovm.test.keychainPassword";
+    private final static String PROP_KEYCHAIN_PASSWORD_FILE = "robovm.test.keychainPasswordFile";
 
     private final ClassLoader testClassLoader;
     private final List<org.junit.runner.notification.RunListener> customRunListeners;
@@ -311,6 +313,12 @@ public class RoboVMSurefireProvider extends AbstractProvider {
                 logger.debug("Using explicit iOS provisioning profile: " + iosProvisioningProfile);
                 configBuilder.iosProvisioningProfile(ProvisioningProfile.find(
                         ProvisioningProfile.list(), iosProvisioningProfile));
+            }
+
+            if (System.getProperty(PROP_KEYCHAIN_PASSWORD) != null) {
+                configBuilder.keychainPassword(System.getProperty(PROP_KEYCHAIN_PASSWORD));
+            } else if (System.getProperty(PROP_KEYCHAIN_PASSWORD_FILE) != null) {
+                configBuilder.keychainPasswordFile(new File(System.getProperty(PROP_KEYCHAIN_PASSWORD_FILE)));
             }
         }
         
