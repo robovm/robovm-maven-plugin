@@ -30,15 +30,21 @@ ${project.name}
 
 * Goals Overview
 
-  * {{{./ipad-sim-mojo.html}robovm:ipad-sim}} compile and deploy your app to the iPad simulator.
+  * {{{./ipad-sim-mojo.html}robovm:ipad-sim}} compile and run your app in the iPad simulator.
 
-  * {{{./iphone-sim-mojo.html}robovm:iphone-sim}} compile and deploy your app to the iPhone simulator.
+  * {{{./iphone-sim-mojo.html}robovm:iphone-sim}} compile and run your app in the iPhone simulator.
 
-  * {{{./ios-device-mojo.html}robovm:ios-device}} compile and deploy your app to an iOS device.
+  * {{{./ios-device-mojo.html}robovm:ios-device}} compile and run your app on a connected iOS device.
+
+  * {{{./tvos-sim-mojo.html}robovm:tvos-sim}}  compile and run your app in the AppleTV simulator.
+
+  * {{{./tvos-device-mojo.html}robovm:tvos-device}} compile and run your app on a connected AppleTV device.
 
   * {{{./console-mojo.html}robovm:console}} compile and launch a console app on the console.
 
-  * {{{./create-ipa-mojo.html}robovm:create-ipa}} compile and bundle your app into an IPA file.
+  * {{{./archive-mojo.html}robovm:archive}} compile and bundle your app into an IPA file.
+
+  * {{{./create-ipa-mojo.html}robovm:create-ipa}} compile and bundle your app into an IPA file (alias for the <<archive>> task).
 
   * {{{./install-mojo.html}robovm:install}} compile an app or binary and install it to <<target/robovm>> or the specified install dir.
 
@@ -90,6 +96,6 @@ ${project.name}
   RoboVM Maven plugin in working projects.
 
   In case you still have questions regarding the plugin's usage, feel free to contact the
-  {{{https://groups.google.com/forum/#!forum/robovm}user mailing list}}. The posts to the mailing
+  {{{https://groups.google.com/group/robovm}user mailing list}}. The posts to the mailing
   list are archived and could already contain the answer to your question as part of an older
   thread. Hence, it is also worth browsing/searching the mail archive.
