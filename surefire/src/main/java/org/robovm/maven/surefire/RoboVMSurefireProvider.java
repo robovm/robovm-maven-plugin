@@ -22,11 +22,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.exec.CommandLine;
 import org.apache.maven.surefire.common.junit4.JUnit4RunListener;
 import org.apache.maven.surefire.common.junit4.JUnit4RunListenerFactory;
 import org.apache.maven.surefire.common.junit4.JUnit4TestChecker;
@@ -77,6 +79,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
     private final static String PROP_CACHE_DIR = "robovm.test.cacheDir";
     private final static String PROP_KEYCHAIN_PASSWORD = "robovm.test.keychainPassword";
     private final static String PROP_KEYCHAIN_PASSWORD_FILE = "robovm.test.keychainPasswordFile";
+    private final static String PROP_RUN_ARGS = "robovm.test.runArgs";
 
     private final ClassLoader testClassLoader;
     private final List<org.junit.runner.notification.RunListener> customRunListeners;
@@ -153,6 +156,14 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             }
         });
 
+        String runArgs = System.getProperty(PROP_RUN_ARGS, "");
+        if (!runArgs.isEmpty()) {
+            testClient.setRunArgs(
+                    new ArrayList<>(
+                            Arrays.asList(
+                                    CommandLine.parse("cmd " + runArgs).getArguments())));
+        }
+        
         Process process = null;
         try {
             Config config = testClient.configure(createConfig()).build();
