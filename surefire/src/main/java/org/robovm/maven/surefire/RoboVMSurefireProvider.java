@@ -166,7 +166,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         
         Process process = null;
         try {
-            Config config = testClient.configure(createConfig()).build();
+            Config config = testClient.configure(createConfig(), isIOS()).build();
             config.getLogger().info("Building RoboVM tests for: %s (%s)", config.getOs(), config.getArch());
             config.getLogger().info("This could take a while, especially the first time round");
             AppCompiler appCompiler = new AppCompiler(config);
@@ -195,6 +195,14 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         }
 
         return reporterFactory.close();
+    }
+
+    private boolean isIOS() {
+        if (System.getProperty(PROP_OS) != null) {
+            return OS.valueOf(System.getProperty(PROP_OS)) == OS.ios;
+        } else {
+            return false;
+        }
     }
 
     private String[] testToRunToClassPatterns(Class<?> clazz) {
@@ -343,6 +351,11 @@ public class RoboVMSurefireProvider extends AbstractProvider {
         configBuilder.clearClasspathEntries();
         
         configBuilder.addClasspathEntry(roboVMResolver.resolveArtifact("org.robovm:robovm-junit-server:" + Version.getVersion()).asFile());
+        if(isIOS()) {
+            configBuilder.addClasspathEntry(roboVMResolver.resolveArtifact("org.robovm:robovm-rt:" + Version.getVersion()).asFile());
+            configBuilder.addClasspathEntry(roboVMResolver.resolveArtifact("org.robovm:robovm-objc:" + Version.getVersion()).asFile());
+            configBuilder.addClasspathEntry(roboVMResolver.resolveArtifact("org.robovm:robovm-cocoatouch:" + Version.getVersion()).asFile());
+        }
         for (String p : System.getProperty("java.class.path").split(File.pathSeparator)) {
             configBuilder.addClasspathEntry(new File(p));
         }
