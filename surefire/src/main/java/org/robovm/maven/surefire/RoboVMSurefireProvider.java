@@ -61,8 +61,10 @@ import org.robovm.compiler.config.Config.Home;
 import org.robovm.compiler.config.OS;
 import org.robovm.compiler.log.Logger;
 import org.robovm.compiler.target.LaunchParameters;
+import org.robovm.compiler.target.ios.DeviceType;
 import org.robovm.compiler.target.ios.ProvisioningProfile;
 import org.robovm.compiler.target.ios.SigningIdentity;
+import org.robovm.compiler.target.ios.SimulatorLaunchParameters;
 import org.robovm.junit.client.TestClient;
 import org.robovm.maven.resolver.RoboVMResolver;
 
@@ -76,6 +78,7 @@ public class RoboVMSurefireProvider extends AbstractProvider {
     private final static String PROP_IOS_SIGNING_IDENTITY = "robovm.test.iosSignIdentity";
     private final static String PROP_IOS_PROVISIONING_PROFILE = "robovm.test.iosProvisioningProfile";
     private final static String PROP_IOS_SKIP_SIGNING = "robovm.test.iosSkipSigning";
+    private final static String PROP_IOS_SIMULATOR_NAME = "robovm.test.device.name";
     private final static String PROP_CACHE_DIR = "robovm.test.cacheDir";
     private final static String PROP_KEYCHAIN_PASSWORD = "robovm.test.keychainPassword";
     private final static String PROP_KEYCHAIN_PASSWORD_FILE = "robovm.test.keychainPasswordFile";
@@ -175,6 +178,14 @@ public class RoboVMSurefireProvider extends AbstractProvider {
             LaunchParameters launchParameters = config.getTarget().createLaunchParameters();
             if (Boolean.getBoolean(PROP_SERVER_DEBUG)) {
                 launchParameters.getArguments().add("-rvm:Drobovm.debug=true");
+            }
+            if (System.getProperty(PROP_IOS_SIMULATOR_NAME) != null && launchParameters instanceof SimulatorLaunchParameters) {
+                DeviceType type = DeviceType.getDeviceType(System.getProperty(PROP_IOS_SIMULATOR_NAME));
+                ((SimulatorLaunchParameters)launchParameters).setDeviceType(type);
+            } else if(launchParameters instanceof SimulatorLaunchParameters) {
+                if(config.getArch() == Arch.x86_64) {
+                    ((SimulatorLaunchParameters)launchParameters).setDeviceType(DeviceType.getBestDeviceType(config.getArch(), config.getOs(), null, null, null));
+                }
             }
             process = appCompiler.launchAsync(launchParameters);
             
